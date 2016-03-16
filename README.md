@@ -11,9 +11,7 @@ The component uses [MediaElement.js (v2.18.1)](http://mediaelementjs.com/), a pl
 This component impliments an autoplay feature on top of the Adapt core media component. See the core media component wiki [Visit the **Media** wiki](https://github.com/adaptlearning/adapt-contrib-media/wiki) for more information about its functionality and for explanations of key properties.  
 
 
-First, be sure to install the [Adapt Command Line Interface](https://github.com/adaptlearning/adapt-cli), then from the command line run:
-
-    adapt install adapt-media-autoplay
+This plugin must be installed manually.
 
 
 <div float align=right><a href="#top">Back to Top</a></div>
@@ -140,3 +138,4 @@ Users of Internet Explorer v8  will need to have [Adobe Flash Player](https://ge
 **Accessibility support:** To be reviewed.  
 **RTL support:** yes  
 **Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), IE 11, IE10, IE9, IE8, IE Mobile 11, Safari for iPhone (iOS 7+8), Safari for iPad (iOS 7+8), Safari 8, Opera     
+**Authoring tool support:** yes  
