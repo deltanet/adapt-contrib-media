@@ -20,6 +20,8 @@ define(function(require) {
             this.listenTo(Adapt, "audio:changeText", this.replaceText);
             // Listen for notify closing
             this.listenTo(Adapt, 'popup:closed', this.notifyClosed);
+            // Listen for notify opening
+            this.listenTo(Adapt, 'popup:opened', this.notifyOpened);
 
             this.checkIfResetOnRevisit();
         },
@@ -79,7 +81,7 @@ define(function(require) {
                 modelOptions.alwaysShowControls = true;
                 modelOptions.hideVideoControlsOnLoad = false;
             }
-            
+
             if (modelOptions.alwaysShowControls === undefined) {
                 modelOptions.alwaysShowControls = false;
             }
@@ -132,12 +134,12 @@ define(function(require) {
                 modelOptions.features = [];
                 if (froogaloopAdded) return callback();
                 Modernizr.load({
-                    load: "assets/froogaloop.js", 
+                    load: "assets/froogaloop.js",
                     complete: function() {
                         froogaloopAdded = true;
                         callback();
                     }
-                }); 
+                });
                 break;
             default:
                 callback();
@@ -157,7 +159,7 @@ define(function(require) {
             }
 
             // Add listener for when the media is playing so the audio can be stopped
-            
+
             if (this.model.get('_audio') && this.model.get('_audio')._isEnabled) {
                 this.mediaElement.addEventListener('playing', _.bind(this.onPlayMedia, this));
             }
