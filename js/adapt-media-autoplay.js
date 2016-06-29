@@ -16,8 +16,6 @@ define(function(require) {
             this.listenTo(Adapt, 'device:resize', this.onScreenSizeChanged);
             this.listenTo(Adapt, 'device:changed', this.onDeviceChanged);
             this.listenTo(Adapt, 'accessibility:toggle', this.onAccessibilityToggle);
-            // Listen for text change on audio extension
-            this.listenTo(Adapt, "audio:changeText", this.replaceText);
             // Listen for notify closing
             this.listenTo(Adapt, 'popup:closed', this.notifyClosed);
             // Listen for notify opening
@@ -29,9 +27,6 @@ define(function(require) {
         postRender: function() {
             this.setupPlayer();
 
-            if (this.model.get('_reducedText') && this.model.get('_reducedText')._isEnabled) {
-                this.replaceText(Adapt.audio.textSize);
-            }
             // Check if notify is visible
             if ($('body').children('.notify').css('visibility') == 'visible') {
                 this.notifyOpened();
@@ -85,7 +80,7 @@ define(function(require) {
                 modelOptions.alwaysShowControls = true;
                 modelOptions.hideVideoControlsOnLoad = false;
             }
-            
+
             if (modelOptions.alwaysShowControls === undefined) {
                 modelOptions.alwaysShowControls = false;
             }
@@ -107,20 +102,6 @@ define(function(require) {
             }, this));
         },
 
-        // Reduced text
-        replaceText: function(value) {
-            // If enabled
-            if (this.model.get('_reducedText') && this.model.get('_reducedText')._isEnabled) {
-                if(value == 0) {
-                    this.$('.component-title-inner').html(this.model.get('displayTitle')).a11y_text();
-                    this.$('.component-body-inner').html(this.model.get('body')).a11y_text();
-                } else {
-                    this.$('.component-title-inner').html(this.model.get('displayTitleReduced')).a11y_text();
-                    this.$('.component-body-inner').html(this.model.get('bodyReduced')).a11y_text();
-                }
-            }
-        },
-
         addMediaTypeClass: function() {
             var media = this.model.get("_media");
             if (media.type) {
@@ -138,12 +119,12 @@ define(function(require) {
                 modelOptions.features = [];
                 if (froogaloopAdded) return callback();
                 Modernizr.load({
-                    load: "assets/froogaloop.js", 
+                    load: "assets/froogaloop.js",
                     complete: function() {
                         froogaloopAdded = true;
                         callback();
                     }
-                }); 
+                });
                 break;
             default:
                 callback();
@@ -163,7 +144,7 @@ define(function(require) {
             }
 
             // Add listener for when the media is playing so the audio can be stopped
-            
+
             if (this.model.get('_audio') && this.model.get('_audio')._isEnabled) {
                 this.mediaElement.addEventListener('playing', _.bind(this.onPlayMedia, this));
             }
