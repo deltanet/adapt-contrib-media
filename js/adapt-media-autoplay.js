@@ -136,12 +136,9 @@ define(function(require) {
 
             if (this.completionEvent !== 'inview') {
                 this.mediaElement.addEventListener(this.completionEvent, _.bind(this.onCompletion, this));
-                if (this.model.get('_autoPlay')) {
-                    this.$('.component-widget').on('inview', _.bind(this.inview, this));
-                }
-            } else {
-                this.$('.component-widget').on('inview', _.bind(this.inview, this));
             }
+
+            this.$('.component-widget').on('inview', _.bind(this.inview, this));
 
             // Add listener for when the media is playing so the audio can be stopped
 
