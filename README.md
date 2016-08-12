@@ -1,35 +1,24 @@
-# adapt-contrib-media  
+# adapt-media-autoplay
 
 <img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/media02.gif" alt="image of media component" align="right">  
 
-**Media** is a *presentation component* bundled with the [Adapt framework](https://github.com/adaptlearning/adapt_framework). 
- 
+**Media Autoplay** is a *community component* for the [Adapt framework](https://github.com/adaptlearning/adapt_framework).
+
 It is a media playback component for audio and video. It uses HTML5 audio and video for browsers that support it and Flash/Silverlight fallbacks for browsers that don't.  
 
 The component uses [MediaElement.js (v2.20.1)](http://mediaelementjs.com/), a player with a number of useful features including subtitles and accessible (and CSS-skinnable) controls. [MediaElement.js](https://github.com/johndyer/mediaelement) carries the MIT license compatible with Adapt.  
 
-[Visit the **Media** wiki](https://github.com/adaptlearning/adapt-contrib-media/wiki) for more information about its functionality and for explanations of key properties.  
+This component impliments an autoplay feature on top of the Adapt core media component. See the core media component wiki [Visit the **Media** wiki](https://github.com/adaptlearning/adapt-contrib-media/wiki) for more information about its functionality and for explanations of key properties.  
 
-##Installation
 
-As one of Adapt's *[core components](https://github.com/adaptlearning/adapt_framework/wiki/Core-Plug-ins-in-the-Adapt-Learning-Framework#components),* **Media** is included with the [installation of the Adapt framework](https://github.com/adaptlearning/adapt_framework/wiki/Manual-installation-of-the-Adapt-framework#installation) and the [installation of the Adapt authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki/Installing-Adapt-Origin).
+This plugin must be installed manually.
 
-* If **Media** has been uninstalled from the Adapt framework, it may be reinstalled.
-With the [Adapt CLI](https://github.com/adaptlearning/adapt-cli) installed, run the following from the command line:  
-`adapt install adapt-contrib-media`
 
-    Alternatively, this component can also be installed by adding the following line of code to the *adapt.json* file:  
-    `"adapt-contrib-media": "*"`  
-    Then running the command:  
-    `adapt install`  
-    (This second method will reinstall all plug-ins listed in *adapt.json*.)  
-
-* If **Media** has been uninstalled from the Adapt authoring tool, it may be reinstalled using the [Plug-in Manager](https://github.com/adaptlearning/adapt_authoring/wiki/Plugin-Manager).  
 <div float align=right><a href="#top">Back to Top</a></div>
 
 ## Settings Overview
 
-The attributes listed below are used in *components.json* to configure **Media**, and are properly formatted as JSON in [*example.json*](https://github.com/adaptlearning/adapt-contrib-media/blob/master/example.json). Visit the [**Media** wiki](https://github.com/adaptlearning/adapt-contrib-media/wiki) for more information about how they appear in the [authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki). 
+The attributes listed below are used in *components.json* to configure **Media**, and are properly formatted as JSON in [*example.json*](https://github.com/adaptlearning/adapt-contrib-media/blob/master/example.json). Visit the [**Media** wiki](https://github.com/adaptlearning/adapt-contrib-media/wiki) for more information about how they appear in the [authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki).
 
 ### Attributes
 
@@ -44,7 +33,9 @@ The attributes listed below are used in *components.json* to configure **Media**
 **instruction** (string): This optional text appears above the component. It is frequently used to
 guide the learner’s interaction with the component.  
 
-**_setCompletionOn** (string): This determines when Adapt will register this component as having been completed by the user. Acceptable values are `inview` (triggered when the component is fully displayed within the viewport), `play` (triggered when playback is initiated), or `ended` (triggered when the video has reached the end of playback). 
+**_setCompletionOn** (string): This determines when Adapt will register this component as having been completed by the user. Acceptable values are `inview` (triggered when the component is fully displayed within the viewport), `play` (triggered when playback is initiated), or `ended` (triggered when the video has reached the end of playback).
+
+**_autoPlay** (boolean): If set to `true`, the video will autoplay. Will behave differently on mobile devices where user interaction may be reqired to start play.
 
 **_useClosedCaptions** (boolean): If set to `true`, video will allow for Closed Captions and the **cc** object will be required. The default is `false`.  
 
@@ -77,13 +68,13 @@ The decision to include more than one file format is typically based on the brow
 
 >**_setCompletionOnView** (boolean): This determines if Adapt will register this component as having been completed by the user when the inline transcript is opened. This is true by default.
 
->**_inlineTranscript** (boolean): Determines whether the button that toggles the display of the inline transcript text will be displayed or not. 
+>**_inlineTranscript** (boolean): Determines whether the button that toggles the display of the inline transcript text will be displayed or not.
 
 >**_externalTranscript** (boolean): Determines whether the button that links to the optional external transcript will be displayed or not.
 
 >**inlineTranscriptButton** (string): This text appears on the button that toggles the visibility of the inline transcript text. It is displayed when the inline transcript text is hidden. If no text is provided, the **transcriptLink** will be displayed on the button.
 
->**inlineTranscriptCloseButton** (string): This text appears on the button that toggles the visibility of the inline transcript. It is displayed when the inline transcript text is visible. 
+>**inlineTranscriptCloseButton** (string): This text appears on the button that toggles the visibility of the inline transcript. It is displayed when the inline transcript text is visible.
 
 >**inlineTranscriptBody** (string): This optional text appears below the video. If provided, its visibility is toggled by clicking the transcript button. It is hidden by default.
 
@@ -105,32 +96,32 @@ The attributes described above focus on the component's use with standard video.
 **Standard video example:**
 ```json
 "_media": {
-	"mp4": "course/en/video/video.mp4",
-	"ogv": "course/en/video/video.ogv"
+  "mp4": "course/en/video/video.mp4",
+  "ogv": "course/en/video/video.ogv"
 },
 ```
 
 **YouTube video example:**
 ```json
 "_media": {
-	"source": "//www.youtube.com/watch?v=RT-KmgAgxuo",
-	"type": "video/youtube"
+  "source": "//www.youtube.com/watch?v=RT-KmgAgxuo",
+  "type": "video/youtube"
 },
 ```  
 
 **Vimeo video example:**
 ```json
 "_media": {
-	"source": "//player.vimeo.com/video/96961553",
-	"type": "video/vimeo"
+  "source": "//player.vimeo.com/video/96961553",
+  "type": "video/vimeo"
 },
 ```  
 
 **Audio example:**
 ```json
 "_media": {
-	"mp3": "course/en/audio/audio.mp3",
-	"ogg": "course/en/audio/audio.ogg"
+  "mp3": "course/en/audio/audio.mp3",
+  "ogg": "course/en/audio/audio.ogg"
 },
 ```  
 
@@ -139,13 +130,14 @@ The attributes described above focus on the component's use with standard video.
 <div float align=right><a href="#top">Back to Top</a></div>
 
 ## Limitations
- 
+
 Users of Internet Explorer v8  will need to have [Adobe Flash Player](https://get.adobe.com/flashplayer/) v10 (or better) or Microsoft [Silverlight](https://www.microsoft.com/getsilverlight/get-started/install/) installed to enable media playback, due to that browser's lack of support for HTML audio/video.
 
 ----------------------------
-**Version number:**  2.0.4   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
+**Version number:**  2.0.6
 **Framework versions:** 2.0  
-**Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-media/graphs/contributors)  
-**Accessibility support:** WAI AA   
+**Author / maintainer:** Deltanet, plus forked code from Adapt Core Team, [contributors](https://github.com/deltanet/adapt-media-autoplay/graphs/contributors)  
+**Accessibility support:** To be reviewed.  
 **RTL support:** yes  
-**Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), Edge 12, IE 11, IE10, IE9, IE8, IE Mobile 11, Safari for iPhone (iOS 8+9), Safari for iPad (iOS 8+9), Safari 8, Opera     
+**Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), IE 11, IE10, IE9, IE8, IE Mobile 11, Safari for iPhone (iOS 7+8), Safari for iPad (iOS 7+8), Safari 8, Opera     
+**Authoring tool support:** yes  
