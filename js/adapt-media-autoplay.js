@@ -1,6 +1,8 @@
 define(function(require) {
 
     var mep = require('components/adapt-media-autoplay/js/mediaelement-and-player');
+    require('components/adapt-media-autoplay/js/mediaelement-and-player-accessible-captions');
+
     var ComponentView = require('coreViews/componentView');
     var Adapt = require('coreJS/adapt');
 
@@ -62,7 +64,10 @@ define(function(require) {
             if(modelOptions.features === undefined) {
                 modelOptions.features = ['playpause','progress','current','duration'];
                 if (this.model.get('_useClosedCaptions')) {
-                    modelOptions.features = ['playpause','progress','tracks','current','duration'];
+                    modelOptions.features.unshift('tracks');
+                }
+                if (this.model.get("_allowFullScreen") && !$("html").is(".ie9")) {
+                    modelOptions.features.push('fullscreen');
                 }
             }
 
@@ -95,8 +100,13 @@ define(function(require) {
                 this.$('audio, video').mediaelementplayer(modelOptions);
 
                 // We're streaming - set ready now, as success won't be called above
-                if (this.model.get('_media').source) {
-                    this.$('.media-widget').addClass('external-source');
+                try {
+                    if (this.model.get('_media').source) {
+                        this.$('.media-widget').addClass('external-source');
+                    }
+                } catch (e) {
+                    console.log("ERROR! No _media property found in components.json for component " + this.model.get('_id'));
+                } finally {
                     this.setReadyStatus();
                 }
             }, this));
@@ -104,7 +114,7 @@ define(function(require) {
 
         addMediaTypeClass: function() {
             var media = this.model.get("_media");
-            if (media.type) {
+            if (media && media.type) {
                 var typeClass = media.type.replace(/\//, "-");
                 this.$(".media-widget").addClass(typeClass);
             }
@@ -112,22 +122,24 @@ define(function(require) {
 
         addThirdPartyFixes: function(modelOptions, callback) {
             var media = this.model.get("_media");
+            if (!media) return callback();
+            
             switch (media.type) {
-            case "video/vimeo":
-                modelOptions.alwaysShowControls = false;
-                modelOptions.hideVideoControlsOnLoad = true;
-                modelOptions.features = [];
-                if (froogaloopAdded) return callback();
-                Modernizr.load({
-                    load: "assets/froogaloop.js",
-                    complete: function() {
-                        froogaloopAdded = true;
-                        callback();
-                    }
-                });
-                break;
-            default:
-                callback();
+                case "video/vimeo":
+                    modelOptions.alwaysShowControls = false;
+                    modelOptions.hideVideoControlsOnLoad = true;
+                    modelOptions.features = [];
+                    if (froogaloopAdded) return callback();
+                    Modernizr.load({
+                        load: "assets/froogaloop.js", 
+                        complete: function() {
+                            froogaloopAdded = true;
+                            callback();
+                        }
+                    }); 
+                    break;
+                default:
+                    callback();
             }
         },
 
@@ -282,11 +294,15 @@ define(function(require) {
             var $button = this.$(".media-inline-transcript-button");
 
             if ($transcriptBodyContainer.hasClass("inline-transcript-open")) {
-                $transcriptBodyContainer.slideUp();
+                $transcriptBodyContainer.slideUp(function() {
+                    $(window).resize();
+                });
                 $transcriptBodyContainer.removeClass("inline-transcript-open");
                 $button.html(this.model.get("_transcript").inlineTranscriptButton);
             } else {
-                $transcriptBodyContainer.slideDown().a11y_focus();
+                $transcriptBodyContainer.slideDown(function() {
+                    $(window).resize();
+                }).a11y_focus();
                 $transcriptBodyContainer.addClass("inline-transcript-open");
                 $button.html(this.model.get("_transcript").inlineTranscriptCloseButton);
                 if (this.model.get('_transcript')._setCompletionOnView !== false) {

@@ -9,14 +9,16 @@
       "required": true,
       "default": "This is a media component which plays a video. Select the play / pause button to watch or listen.",
       "inputType": "Text",
-      "validators": []
+      "validators": [],
+      "translatable": true
     },
     "transcriptButton": {
       "type": "string",
       "required": false,
       "default": "Alternatively you can select the link below for the transcript.",
       "inputType": "Text",
-      "validators": []
+      "validators": [],
+      "translatable": true
     }
   },
   "properties":{
@@ -33,7 +35,8 @@
       "default": "",
       "inputType": "Text",
       "validators": [],
-      "help": "This is the instruction text"
+      "help": "This is the instruction text",
+      "translatable": true
     },
     "_media": {
       "type":"object",
@@ -108,7 +111,7 @@
                 "default": "",
                 "title": "Language Code",
                 "inputType": "Text",
-                "validators": []
+                "validators": ["required"]
               },
               "src": {
                 "type":"string",
@@ -116,7 +119,7 @@
                 "default": "",
                 "title": "Caption File",
                 "inputType": "Asset:other",
-                "validators": []
+                "validators": ["required"]
               }
             }
           }
@@ -160,6 +163,15 @@
       "validators": [],
       "help": "Select which closed caption language to display by default. Only required when closed captions are enabled and there are multiple languages."
     },
+    "_allowFullScreen": {
+      "type":"boolean",
+      "required":false,
+      "default": false,
+      "title": "Allow Full Screen",
+      "inputType": {"type": "Boolean", "options": [true, false]},
+      "validators": [],
+      "help": "If set to 'true', the full screen button will appear (excluding IE9)."
+    },
     "_transcript": {
       "type":"object",
       "required":false,
@@ -196,7 +208,8 @@
           "default": "",
           "title": "Inline Open Button",
           "inputType": "Text",
-          "validators": []
+          "validators": [],
+          "translatable": true
         },
         "inlineTranscriptCloseButton": {
           "type": "string",
@@ -204,7 +217,8 @@
           "default": "",
           "title": "Inline Close Button",
           "inputType": "Text",
-          "validators": []
+          "validators": [],
+          "translatable": true
         },
         "inlineTranscriptBody": {
           "type":"string",
@@ -213,7 +227,8 @@
           "title": "Inline Transcript",
           "inputType": "TextArea",
           "validators": [],
-          "help": "Optional text appears below the video"
+          "help": "Optional text appears below the video",
+          "translatable": true
         },
         "transcriptLinkButton": {
           "type": "string",
@@ -221,7 +236,8 @@
           "default": "",
           "title": "Link Open Button",
           "inputType": "Text",
-          "validators": []
+          "validators": [],
+          "translatable": true
         },
         "transcriptLink": {
           "type":"string",
