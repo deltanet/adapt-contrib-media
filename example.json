@@ -15,6 +15,7 @@
     "_autoPlayOnce":true,
     "_useClosedCaptions":true,
     "_startLanguage":"en",
+    "_allowFullScreen":false,
     "_media": {
         "mp4": "course/assets/big_buck_bunny.mp4",
         "ogv": "course/assets/big_buck_bunny.ogv",
