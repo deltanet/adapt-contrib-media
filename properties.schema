@@ -145,6 +145,15 @@
       "validators": [],
       "help": "Select 'true' to auto play media"
     },
+    "_autoPlayOnce": {
+      "type":"boolean",
+      "required":false,
+      "default": false,
+      "title": "Autoplay Once",
+      "inputType": {"type": "Boolean", "options": [true, false]},
+      "validators": [],
+      "help": "Select 'true' to play only once"
+    },
     "_useClosedCaptions": {
       "type":"boolean",
       "required":false,
@@ -251,11 +260,13 @@
       }
     },
     "_playerOptions": {
-      "type":"string",
-      "required":false,
-      "default": "",
+      "type": "object",
+      "default": {},
       "title": "Player Options",
-      "inputType": "Text",
+      "inputType": {
+        "type": "CodeEditor",
+        "mode": "json"
+      },
       "validators": [],
       "help": "Optional object that can be used to customize the player"
     }
