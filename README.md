@@ -6,7 +6,7 @@
 
 It is a media playback component for audio and video. It uses HTML5 audio and video for browsers that support it and Flash/Silverlight fallbacks for browsers that don't.  
 
-The component uses [MediaElement.js (v2.20.1)](http://mediaelementjs.com/), a player with a number of useful features including subtitles and accessible (and CSS-skinnable) controls. [MediaElement.js](https://github.com/johndyer/mediaelement) carries the MIT license compatible with Adapt.  
+The component uses [MediaElement.js (v2.21.2)](http://mediaelementjs.com/), a player with a number of useful features including subtitles and accessible (and CSS-skinnable) controls. [MediaElement.js](https://github.com/johndyer/mediaelement) carries the MIT license compatible with Adapt.  
 
 This component impliments an autoplay feature on top of the Adapt core media component. See the core media component wiki [Visit the **Media** wiki](https://github.com/adaptlearning/adapt-contrib-media/wiki) for more information about its functionality and for explanations of key properties.  
 
@@ -44,11 +44,13 @@ guide the learner’s interaction with the component.
 **_startLanguage** (string): If using closed captions with multiple languages, use this property to specify which language should be shown by default. The value of this property must match one of the **srclang** values.  
 
 **_media** (object): The media attributes group will contain different values depending on the type of media: video or audio.  
-For video it contains values for **mp4**, **ogv**, **poster**, and **cc**. Both **mp4** and **ogv** are optional, but at least one is required (see below for alternate properties for YouTube video).  
+For video it contains values for **mp4**, **webm**, **ogv**, **poster**, and **cc**. The properties **mp4**, **webm** and **ogv** are all optional, but at least one is required (see below for alternate properties for YouTube/Vimeo video).  
 For audio it contains **mp3** and **ogg**. As with video, both are optional, but at least one is required.  
 The decision to include more than one file format is typically based on the browser/s used by the targeted audience. The mostly widely supported video file format is [mp4](http://caniuse.com/#feat=mpeg4) (specifically [H.264/MPEG-4 Part 10 AVC](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC)). The most widely supported audio format is mp3.
 
 >**mp4** (string): File name (including path) of the video file. Path should be relative to the *src* folder (e.g., *course/en/video/video-1.mp4*).
+
+>**webm** (string): File name (including path) of the video file. Path should be relative to the *src* folder (e.g., *course/en/video/video-1.webm*).
 
 >**ogv** (string): File name (including path) of the video file. Path should be relative to the *src* folder (e.g., *course/en/video/video-1.ogv*).
 
@@ -82,7 +84,7 @@ The decision to include more than one file format is typically based on the brow
 
 >**transcriptLink** (string): File name (including path) of the optional external transcript. Path should be relative to the *src* folder (e.g., *course/en/pdf/video01_transcript.pdf*).  
 
-**_playerOptions** (object): This optional object can be used to customize the player. Visit the [MediaElement website](http://mediaelementjs.com/#options) for a list of what options are available. Options are configured in components.json. See [*example.json*](https://github.com/adaptlearning/adapt-contrib-media/blob/master/example.json) for a suggested configuration that has been confirmed as working on the full range of Adapt's supported devices. Currently, the Adapt authoring tool does not accommodate configuring these options; courses that require **_playerOptions** must be built directly in the [Adapt framework](https://github.com/adaptlearning/adapt_framework/wiki).  
+**_playerOptions** (object): This optional object can be used to customize the player. Visit the [MediaElement website](http://mediaelementjs.com/#options) for a list of what options are available. Options are configured in components.json. See [*example.json*](https://github.com/adaptlearning/adapt-contrib-media/blob/master/example.json) for a suggested configuration.
 >**Note:**  
 >The **_playerOptions** feature is experimental. As these settings are not implemented by the Adapt community, there is no guarantee that all features and combinations thereof will be compatible with your device set up.    
 
@@ -132,6 +134,18 @@ The attributes described above focus on the component's use with standard video.
 ## Limitations
 
 Users of Internet Explorer v8  will need to have [Adobe Flash Player](https://get.adobe.com/flashplayer/) v10 (or better) or Microsoft [Silverlight](https://www.microsoft.com/getsilverlight/get-started/install/) installed to enable media playback, due to that browser's lack of support for HTML audio/video.
+
+Browser | Limitation | 
+--------- | :----------- |
+Chrome   | No known issues.
+FireFox | No known issues.
+iOS/iPad | No known issues.
+Android | FireFox 33.1 with Vimeo: 'This video can't be played with your current setup'.
+Edge | No known issues.
+IE11 | No known issues.
+IE10 | No known issues.
+IE9 | Vimeo: ‘Sorry this video does not exist’.  
+IE8 | <ul><li>Due to the lack of support for HTML audio/video, users will need to have [Adobe Flash Player](https://get.adobe.com/flashplayer/) v10 (or better) or Microsoft [Silverlight](https://www.microsoft.com/getsilverlight/get-started/install/) installed to enable media playback.</li><li>YouTube: control bar missing</li><li>YouTube/Vimeo: doesn’t track play/ended events</li></ul>
 
 ----------------------------
 **Version number:**  2.0.8
