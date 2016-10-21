@@ -268,7 +268,6 @@ define(function(require) {
 
         playMediaElement: function(state) {
             if (this.model.get('_isVisible') && state) {
-              console.log("_isVisible = "+this.model.get('_isVisible'));
                 this.mediaElement.play();
                 // Set to false to stop autoplay when inview again
                 if(this.mediaAutoplayOnce) {
