@@ -181,12 +181,16 @@ define(function(require) {
                 this.mediaElement.addEventListener(this.completionEvent, _.bind(this.onCompletion, this));
             }
 
-            this.$('.component-widget').on('inview', _.bind(this.inview, this));
-
             // Add listener for when the media is playing so the audio can be stopped
             if (this.model.get('_audio') && this.model.get('_audio')._isEnabled) {
                 this.mediaElement.addEventListener('playing', _.bind(this.onPlayMedia, this));
             }
+
+            this.listenTo(Adapt, "pageView:ready", this.pageReady);
+        },
+
+        pageReady: function () {
+          this.$('.component-widget').on('inview', _.bind(this.inview, this));
         },
 
         // Overrides the default play/pause functionality to stop accidental playing on touch devices
