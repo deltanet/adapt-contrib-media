@@ -195,6 +195,12 @@ define([
             	'pause': this.onMediaElementPause,
             	'ended': this.onMediaElementEnded
             });
+
+            this.listenTo(Adapt, "pageView:ready", this.pageReady);
+        },
+
+        pageReady: function () {
+          this.$('.component-widget').on('inview', _.bind(this.inview, this));
         },
 
         onMediaElementPlay: function(event) {
