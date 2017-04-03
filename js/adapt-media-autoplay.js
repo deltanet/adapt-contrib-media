@@ -6,8 +6,8 @@ define([
 ], function(Adapt, ComponentView) {
 
     var froogaloopAdded = false;
-    
-    // The following function is used to to prevent a memory leak in Internet Explorer 
+
+    // The following function is used to to prevent a memory leak in Internet Explorer
     // See: http://javascript.crockford.com/memory/leak.html
     function purge(d) {
         var a = d.attributes, i, l, n;
@@ -28,7 +28,7 @@ define([
         }
     }
 
-    var Media = ComponentView.extend({
+    var MediaAutoplay = ComponentView.extend({
 
         events: {
             "click .media-inline-transcript-button": "onToggleInlineTranscript",
@@ -39,6 +39,10 @@ define([
             this.listenTo(Adapt, 'device:resize', this.onScreenSizeChanged);
             this.listenTo(Adapt, 'device:changed', this.onDeviceChanged);
             this.listenTo(Adapt, 'accessibility:toggle', this.onAccessibilityToggle);
+            // Listen for notify closing
+            this.listenTo(Adapt, 'popup:closed', this.notifyClosed);
+            // Listen for notify opening
+            this.listenTo(Adapt, 'popup:opened', this.notifyOpened);
 
             _.bindAll(this, 'onMediaElementPlay', 'onMediaElementPause', 'onMediaElementEnded');
 
@@ -55,7 +59,7 @@ define([
 
                 media.source = media.source.replace(/^https?\:/, "");
 
-                this.model.set('_media', media); 
+                this.model.set('_media', media);
             }
 
             this.checkIfResetOnRevisit();
@@ -63,9 +67,34 @@ define([
 
         postRender: function() {
             this.setupPlayer();
+
+            // Check if notify is visible
+            if ($('body').children('.notify').css('visibility') == 'visible') {
+                this.notifyOpened();
+            }
+        },
+
+        notifyOpened: function() {
+            this.notifyIsOpen = true;
+            this.playMediaElement(false);
+        },
+
+        notifyClosed: function() {
+            this.notifyIsOpen = false;
+
+            if (this.model.get('_autoPlay') && this.videoIsInView == true && this.mediaCanAutoplay) {
+                this.playMediaElement(true);
+            }
         },
 
         setupPlayer: function() {
+
+            this.notifyIsOpen = false;
+
+            this.mediaAutoplayOnce = this.model.get('_autoPlayOnce');
+
+            this.mediaCanAutoplay = this.model.get('_autoPlay');
+
             if (!this.model.get('_playerOptions')) this.model.set('_playerOptions', {});
 
             var modelOptions = this.model.get('_playerOptions');
@@ -160,7 +189,7 @@ define([
                 this.$('.component-widget').on('inview', _.bind(this.inview, this));
             }
 
-            // handle other completion events in the event Listeners 
+            // handle other completion events in the event Listeners
             $(this.mediaElement).on({
             	'play': this.onMediaElementPlay,
             	'pause': this.onMediaElementPause,
@@ -173,7 +202,7 @@ define([
                 '_isMediaPlaying': true,
                 '_isMediaEnded': false
             });
-            
+
             if (this.completionEvent === 'play') {
                 this.setCompletionStatus();
             }
@@ -189,6 +218,17 @@ define([
             if (this.completionEvent === 'ended') {
                 this.setCompletionStatus();
             }
+
+            if (this.completionEvent !== 'inview') {
+                this.mediaElement.addEventListener(this.completionEvent, _.bind(this.onCompletion, this));
+            }
+
+            // Add listener for when the media is playing so the audio can be stopped
+            if (this.model.get('_audio') && this.model.get('_audio')._isEnabled) {
+                this.mediaElement.addEventListener('playing', _.bind(this.onPlayMedia, this));
+            }
+
+            this.listenTo(Adapt, "pageView:ready", this.pageReady);
         },
 
         // Overrides the default play/pause functionality to stop accidental playing on touch devices
@@ -197,7 +237,7 @@ define([
             var player = this.mediaElement.player;
 
             if (!player) {
-                console.log("Media.setupPlayPauseToggle: OOPS! there's no player reference.");
+                console.log("MediaAutoplay.setupPlayPauseToggle: OOPS! there's no player reference.");
                 return;
             }
 
@@ -240,19 +280,39 @@ define([
 
         inview: function(event, visible, visiblePartX, visiblePartY) {
             if (visible) {
-                if (visiblePartY === 'top') {
+                if (visiblePartY === 'top' || visiblePartY === 'both') {
                     this._isVisibleTop = true;
-                } else if (visiblePartY === 'bottom') {
-                    this._isVisibleBottom = true;
                 } else {
-                    this._isVisibleTop = true;
-                    this._isVisibleBottom = true;
+                    this._isVisibleTop = false;
                 }
-
-                if (this._isVisibleTop && this._isVisibleBottom) {
+                if (this._isVisibleTop) {
+                    if (this.model.get('_autoPlay') && this.notifyIsOpen == false && this.mediaCanAutoplay == true) {
+                        this.playMediaElement(true);
+                    }
+                    if (this.model.get('_setCompletionOn') == 'inview') {
+                        this.setCompletionStatus();
+                    }
                     this.$('.component-inner').off('inview');
-                    this.setCompletionStatus();
+                    this.videoIsInView = true;
+                } else {
+                    this.playMediaElement(false);
+                    this.videoIsInView = false;
                 }
+            } else {
+                this.playMediaElement(false);
+                this.videoIsInView = false;
+            }
+        },
+
+        playMediaElement: function(state) {
+            if (this.model.get('_isVisible') && state) {
+                this.mediaElement.play();
+                // Set to false to stop autoplay when inview again
+                if(this.mediaAutoplayOnce) {
+                    this.mediaCanAutoplay = false;
+                }
+            } else if (state === false) {
+                this.mediaElement.pause();
             }
         },
 
@@ -301,6 +361,12 @@ define([
             }
 
             ComponentView.prototype.remove.call(this);
+        },
+
+        onPlayMedia: function() {
+            if (!Adapt.audio.audioClip[this.model.get('_audio')._channel].paused) {
+                Adapt.trigger('audio:pauseAudio', this.model.get('_audio')._channel);
+            }
         },
 
         onDeviceChanged: function() {
@@ -365,6 +431,9 @@ define([
                     this.setCompletionStatus();
                 }
             }
+            _.delay(_.bind(function() {
+                Adapt.trigger('device:resize');
+            }, this), 300);
         },
 
         onExternalTranscriptClicked: function(event) {
@@ -402,8 +471,8 @@ define([
 
     });
 
-    Adapt.register('media', Media);
+    Adapt.register('media-autoplay', MediaAutoplay);
 
-    return Media;
+    return MediaAutoplay;
 
 });

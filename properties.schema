@@ -145,6 +145,24 @@
       "validators": ["required"],
       "help": "Defines what media event should trigger completion of this component."
     },
+    "_autoPlay": {
+      "type":"boolean",
+      "required":false,
+      "default": false,
+      "title": "Set autoplay of video or audio",
+      "inputType": {"type": "Boolean", "options": [true, false]},
+      "validators": [],
+      "help": "Select 'true' to auto play media"
+    },
+    "_autoPlayOnce": {
+      "type":"boolean",
+      "required":false,
+      "default": false,
+      "title": "Autoplay Once",
+      "inputType": {"type": "Boolean", "options": [true, false]},
+      "validators": [],
+      "help": "Select 'true' to play only once"
+    },
     "_useClosedCaptions": {
       "type":"boolean",
       "required":false,
