@@ -101,7 +101,7 @@ define([
 
             if (modelOptions.pluginPath === undefined) modelOptions.pluginPath = 'assets/';
             if(modelOptions.features === undefined) {
-                modelOptions.features = ['playpause','progress','current','duration'];
+                modelOptions.features = ['playpause','progress','current','duration', 'volume'];
                 if (this.model.get('_useClosedCaptions')) {
                     modelOptions.features.unshift('tracks');
                 }
@@ -481,10 +481,8 @@ define([
 
         setVideoVolume: function() {
           if(Adapt.audio.audioStatus == 1){
-            this.mediaElement.setMuted(false);
             this.mediaElement.setVolume(this.mediaElement.player.options.startVolume);
           } else {
-            this.mediaElement.setMuted(true);
             this.mediaElement.setVolume(0);
           }
         }
