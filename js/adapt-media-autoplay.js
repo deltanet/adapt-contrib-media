@@ -101,7 +101,7 @@ define([
 
             if (modelOptions.pluginPath === undefined) modelOptions.pluginPath = 'assets/';
             if(modelOptions.features === undefined) {
-                modelOptions.features = ['playpause','progress','current','duration'];
+                modelOptions.features = ['playpause','progress','current','duration', 'volume'];
                 if (this.model.get('_useClosedCaptions')) {
                     modelOptions.features.unshift('tracks');
                 }
@@ -149,6 +149,8 @@ define([
                     this.setReadyStatus();
                 }
             }, this));
+
+            this.setVideoVolume();
         },
 
         addMediaTypeClass: function() {
@@ -197,6 +199,8 @@ define([
             });
 
             this.listenTo(Adapt, "pageView:ready", this.pageReady);
+
+            this.listenTo(Adapt, "audio:updateAudioStatus", this.setVideoVolume);
         },
 
         pageReady: function () {
@@ -473,6 +477,14 @@ define([
                     "aria-hidden": "true"
                 });
             }
+        },
+
+        setVideoVolume: function() {
+          if(Adapt.audio.audioStatus == 1){
+            this.mediaElement.setVolume(this.mediaElement.player.options.startVolume);
+          } else {
+            this.mediaElement.setVolume(0);
+          }
         }
 
     });
