@@ -68,6 +68,26 @@ The decision to include more than one file format is typically based on the brow
 
 >**ogg** (string): File name (including path) of the audio file. Path should be relative to the *src* folder (e.g., *course/en/audio/audio-1.ogg*).
 
+**_videoInstruction** (object):  The video instruction attributes group contains values for **_isEnabled**, **_position**, **_hideOnRevisit**, **_first**, and **_revisit**.
+
+>**_isEnabled** (boolean): This determines if the video instruction functionality is used. This is false by default.
+
+>**_position** (number): This sets the verticle position of the instruction area from the top of the video as a percentage.
+
+>**_hideOnRevisit** (boolean): If set to True the instruction area will be hidden on re-visit.
+
+>**_first** (object):  The first attributes group contains values for **start**, and **end**.
+
+>>**start** (string): This text appears as the instruction text at the start of the video on first visit. If no text is provided, the instruction area will be hidden.
+
+>>**end** (string): This text appears as the instruction text at the end of the video on first visit. If no text is provided, the instruction area will be hidden.
+
+>**_revisit** (object):  The revisit attributes group contains values for **start**, and **end**.
+
+>>**start** (string): This text appears as the instruction text at the start of the video on revisit. If no text is provided, the instruction area will be hidden.
+
+>>**end** (string): This text appears as the instruction text at the end of the video on revisit. If no text is provided, the instruction area will be hidden.
+
 **_transcript** (object):  The transcript attributes group contains values for **_inlineTranscript**, **_externalTranscript**, **inlineTranscriptButton**, **inlineTranscriptCloseButton**, **inlineTranscriptBody**, **transcriptLinkButton**, and **transcriptLink**.
 
 >**_setCompletionOnView** (boolean): This determines if Adapt will register this component as having been completed by the user when the inline transcript is opened. This is true by default.
