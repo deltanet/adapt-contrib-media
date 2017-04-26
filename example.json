@@ -32,6 +32,19 @@
             }
         ]
     },
+    "_videoInstruction": {
+      "_isEnabled": true,
+      "_position": 75,
+      "_hideOnRevisit": false,
+      "_first": {
+        "start": "",
+        "end": ""
+      },
+      "_revisit": {
+        "start": "",
+        "end": ""
+      }
+    },
     "_transcript": {
         "_setCompletionOnView":true,
         "_inlineTranscript": true,

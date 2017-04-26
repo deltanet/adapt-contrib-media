@@ -51,6 +51,17 @@
         }
     }
 
+    .media-instruction-container {
+      position: absolute;
+    }
+
+    .video-instruction {
+      .instruction-text;
+      padding: @component-padding;
+      background-color: @background-color;
+      text-align: center;
+    }
+
     .media-transcript {
         padding: @button-padding;
         display: block;
@@ -116,7 +127,7 @@
             background-image: url(../../assets/controls.svg);
         }
     }
-    
+
     .accessibility.no-touch & {
         .mejs-controls .mejs-button {
             button:focus {

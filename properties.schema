@@ -199,6 +199,90 @@
       "validators": [],
       "help": "If set to 'true', videos will play 'inline' on iPhones (the same way they do on iPads). Note that this feature is only available in iOS10 and above."
     },
+    "_videoInstruction": {
+      "type":"object",
+      "required":false,
+      "title": "Media Instructions",
+      "properties":{
+        "_isEnabled": {
+          "type":"boolean",
+          "required":false,
+          "default": false,
+          "title": "Is Enabled",
+          "inputType": { "type": "Boolean", "options": [false, true]},
+          "validators": [],
+          "help": "Enables instruction text at the start and end of the media."
+        },
+        "_position": {
+          "type": "number",
+          "required": false,
+          "inputType": "Number",
+          "title": "Position",
+          "default": 75,
+          "validators": ["number"],
+          "help": "Set the position on screen for the instruction bar. This is as a percentage from the top of the media element."
+        },
+        "_hideOnRevisit": {
+          "type":"boolean",
+          "required":false,
+          "default": false,
+          "title": "Hide On Revisit",
+          "inputType": {"type": "Boolean", "options": [true, false]},
+          "validators": [],
+          "help": "Set to True to hide the instruction text when a user revisits the component."
+        },
+        "_first": {
+          "type":"object",
+          "required":true,
+          "title": "Text On First Visit",
+          "properties":{
+            "start": {
+              "type": "string",
+              "required": false,
+              "default": "",
+              "title": "Start Text",
+              "inputType": "Text",
+              "validators": [],
+              "translatable": true
+            },
+            "end": {
+              "type": "string",
+              "required": false,
+              "default": "",
+              "title": "End Text",
+              "inputType": "Text",
+              "validators": [],
+              "translatable": true
+            }
+          }
+        },
+        "_revisit": {
+          "type":"object",
+          "required":true,
+          "title": "Text On Re-Visit",
+          "properties":{
+            "start": {
+              "type": "string",
+              "required": false,
+              "default": "",
+              "title": "Start Text",
+              "inputType": "Text",
+              "validators": [],
+              "translatable": true
+            },
+            "end": {
+              "type": "string",
+              "required": false,
+              "default": "",
+              "title": "End Text",
+              "inputType": "Text",
+              "validators": [],
+              "translatable": true
+            }
+          }
+        }
+      }
+    },
     "_transcript": {
       "type":"object",
       "required":false,
