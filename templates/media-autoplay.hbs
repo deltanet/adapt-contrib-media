@@ -31,6 +31,17 @@
       {{/if}}
     {{/if}}
     </div>
+
+    {{#if _videoInstruction}}
+    <div class="media-instruction-container">
+        <div class="{{_component}}-instruction video-instruction">
+            <div class="{{_component}}-instruction-inner component-instruction-inner">
+                {{{a11y_text}}}
+            </div>
+        </div>
+    </div>
+    {{/if}}
+
     {{#if _transcript}}
     <div class="media-transcript-container">
 

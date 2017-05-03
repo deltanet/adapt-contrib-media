@@ -36,13 +36,13 @@ define([
         },
 
         preRender: function() {
+            this.listenTo(Adapt, 'popup:closed', this.notifyClosed);
+            this.listenTo(Adapt, 'popup:opened', this.notifyOpened);
+            this.listenTo(this.model, 'change:_isComplete', this.checkCompletion);
+
             this.listenTo(Adapt, 'device:resize', this.onScreenSizeChanged);
             this.listenTo(Adapt, 'device:changed', this.onDeviceChanged);
             this.listenTo(Adapt, 'accessibility:toggle', this.onAccessibilityToggle);
-            // Listen for notify closing
-            this.listenTo(Adapt, 'popup:closed', this.notifyClosed);
-            // Listen for notify opening
-            this.listenTo(Adapt, 'popup:opened', this.notifyOpened);
 
             _.bindAll(this, 'onMediaElementPlay', 'onMediaElementPause', 'onMediaElementEnded');
 
@@ -67,7 +67,12 @@ define([
 
         postRender: function() {
             this.setupPlayer();
-
+            // Set up instructions
+            if(this.model.has('_videoInstruction')) {
+              if(this.model.get('_videoInstruction')._isEnabled) {
+                this.setupInstructions();
+              }
+            }
             // Check if notify is visible
             if ($('body').children('.notify').css('visibility') == 'visible') {
                 this.notifyOpened();
@@ -81,20 +86,32 @@ define([
 
         notifyClosed: function() {
             this.notifyIsOpen = false;
-
-            if (this.model.get('_autoPlay') && this.videoIsInView == true && this.mediaCanAutoplay) {
+            if (this.videoIsInView == true && this.mediaCanAutoplay && this.firstRun) {
                 this.playMediaElement(true);
             }
         },
 
+        setupInstructions: function() {
+          // Position instructions
+          this.instructionPosition = this.model.get('_videoInstruction')._position;
+          this.positionInstruction();
+          // Determine start and end instructions based on the completion status
+          if(this.model.get("_isComplete")) {
+            this.instructionStart = this.model.get('_videoInstruction')._revisit.start;
+            this.instructionEnd = this.model.get('_videoInstruction')._revisit.end;
+          } else {
+            this.instructionStart = this.model.get('_videoInstruction')._first.start;
+            this.instructionEnd = this.model.get('_videoInstruction')._first.end;
+          }
+          // If hidden on revisit
+          if((this.model.get("_isComplete") && this.model.get('_videoInstruction')._hideOnRevisit) || this.mediaCanAutoplay) {
+            this.hideInstruction();
+          } else {
+            this.changeInstructionStart();
+          }
+        },
+
         setupPlayer: function() {
-
-            this.notifyIsOpen = false;
-
-            this.mediaAutoplayOnce = this.model.get('_autoPlayOnce');
-
-            this.mediaCanAutoplay = this.model.get('_autoPlay');
-
             if (!this.model.get('_playerOptions')) this.model.set('_playerOptions', {});
 
             var modelOptions = this.model.get('_playerOptions');
@@ -150,6 +167,11 @@ define([
                 }
             }, this));
 
+            this.firstRun = true;
+            this.notifyIsOpen = false;
+            this.mediaAutoplayOnce = this.model.get('_autoPlayOnce');
+            this.mediaCanAutoplay = this.model.get('_autoPlay');
+
             this.setVideoVolume();
         },
 
@@ -187,10 +209,6 @@ define([
         setupEventListeners: function() {
             this.completionEvent = (!this.model.get('_setCompletionOn')) ? 'play' : this.model.get('_setCompletionOn');
 
-            if (this.completionEvent === 'inview') {
-                this.$('.component-widget').on('inview', _.bind(this.inview, this));
-            }
-
             // handle other completion events in the event Listeners
             $(this.mediaElement).on({
             	'play': this.onMediaElementPlay,
@@ -198,8 +216,12 @@ define([
             	'ended': this.onMediaElementEnded
             });
 
-            this.listenTo(Adapt, "pageView:ready", this.pageReady);
+            // Add listener for when the media is playing so the audio can be stopped
+            if (this.model.get('_audio') && this.model.get('_audio')._isEnabled) {
+                this.mediaElement.addEventListener('playing', _.bind(this.onPlayMedia, this));
+            }
 
+            this.listenTo(Adapt, "pageView:ready", this.pageReady);
             this.listenTo(Adapt, "audio:updateAudioStatus", this.setVideoVolume);
         },
 
@@ -216,6 +238,12 @@ define([
             if (this.completionEvent === 'play') {
                 this.setCompletionStatus();
             }
+
+            if(this.model.has('_videoInstruction')) {
+              if(this.model.get('_videoInstruction')._isEnabled) {
+                this.hideInstruction();
+              }
+            }
         },
 
         onMediaElementPause: function(event) {
@@ -229,16 +257,15 @@ define([
                 this.setCompletionStatus();
             }
 
-            if (this.completionEvent !== 'inview') {
-                this.mediaElement.addEventListener(this.completionEvent, _.bind(this.onCompletion, this));
+            if(this.firstRun) {
+              if(this.model.has('_videoInstruction')) {
+                if(this.model.get('_videoInstruction')._isEnabled) {
+                  this.changeInstructionEnd();
+                }
+              }
             }
 
-            // Add listener for when the media is playing so the audio can be stopped
-            if (this.model.get('_audio') && this.model.get('_audio')._isEnabled) {
-                this.mediaElement.addEventListener('playing', _.bind(this.onPlayMedia, this));
-            }
-
-            this.listenTo(Adapt, "pageView:ready", this.pageReady);
+            this.firstRun = false;
         },
 
         // Overrides the default play/pause functionality to stop accidental playing on touch devices
@@ -357,8 +384,8 @@ define([
                     delete mejs.players[player_id];
                 }
             }
-
             if (this.mediaElement) {
+                this.mediaElement.removeEventListener('playing', this.onPlayMedia);
                 $(this.mediaElement).off({
                 	'play': this.onMediaElementPlay,
                 	'pause': this.onMediaElementPause,
@@ -383,6 +410,7 @@ define([
             if (this.model.get('_media').source) {
                 this.$('.mejs-container').width(this.$('.component-widget').width());
             }
+            this.positionInstruction();
         },
 
         onPlayerReady: function (mediaElement, domObject) {
@@ -403,6 +431,56 @@ define([
             this.setupEventListeners();
         },
 
+        positionInstruction: function () {
+          this.$('.media-instruction-container').css({
+            top: this.instructionPosition,
+            width: this.$('.component-widget').width()
+          });
+        },
+
+        checkCompletion: function () {
+          // Add check for element for backwards compatability
+          if(this.model.has('_videoInstruction')) {
+            if(this.model.get('_videoInstruction')._isEnabled && this.model.get("_isComplete")) {
+              this.changeInstructionEnd();
+            }
+          }
+        },
+
+        changeInstructionStart: function () {
+          // Check for empty elements
+          if(this.instructionStart == "") {
+            this.hideInstruction();
+          } else {
+            this.$('.video-instruction').find('.component-instruction-inner').html(this.instructionStart);
+            this.showInstruction();
+          }
+        },
+
+        changeInstructionEnd: function () {
+          // Check for empty elements
+          if(this.instructionEnd == "") {
+            this.hideInstruction();
+          } else {
+            this.$('.video-instruction').find('.component-instruction-inner').html(this.instructionEnd);
+            this.showInstruction();
+          }
+        },
+
+        hideInstruction: function () {
+          this.$('.video-instruction').hide();
+        },
+
+        showInstruction: function () {
+          this.$('.media-instruction-container').css({ top: (this.instructionPosition - 20)+'%'});
+          this.$('.video-instruction').show();
+          if(Adapt.config.get('_disableAnimation')) {
+            this.$('.media-instruction-container').css({ top: this.instructionPosition+'%'});
+          } else {
+            this.$('.media-instruction-container').animate({ top: this.instructionPosition+'%'}, 500);
+          }
+        },
+
         addThirdPartyAfterFixes: function() {
             var media = this.model.get("_media");
             switch (media.type) {
@@ -413,6 +491,7 @@ define([
 
         onScreenSizeChanged: function() {
             this.$('audio, video').width(this.$('.component-widget').width());
+            this.positionInstruction();
         },
 
         onAccessibilityToggle: function() {
@@ -436,7 +515,6 @@ define([
                 }).a11y_focus();
                 $transcriptBodyContainer.addClass("inline-transcript-open");
                 $button.html(this.model.get("_transcript").inlineTranscriptCloseButton);
-
                 if (this.model.get('_transcript')._setCompletionOnView !== false) {
                     this.setCompletionStatus();
                 }

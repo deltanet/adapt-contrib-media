@@ -39,9 +39,9 @@ guide the learner’s interaction with the component.
 
 **_useClosedCaptions** (boolean): If set to `true`, video will allow for Closed Captions and the **cc** object will be required. The default is `false`.  
 
-**_allowFullScreen** (boolean): Determines whether fullscreen mode is available or not. Note that changing this setting has no effect in Internet Explorer 9 as this browser does not support fullscreen mode for HTML video.
+**_allowFullScreen** (boolean): Determines whether fullscreen mode is available or not. Note that changing this setting has no effect in Internet Explorer 9 as this browser does not support fullscreen mode for HTML video.  
 
-**_playsinline** (boolean): If set to `true`, videos will play 'inline' on iPhones (the same way they do on iPads). Note that this feature is only available in iOS10 and above. The default is `false`.        
+**_playsinline** (boolean): If set to `true`, videos will play 'inline' on iPhones (the same way they do on iPads). Note that this feature is only available in iOS10 and above. The default is `false`.  
 
 **_startLanguage** (string): If using closed captions with multiple languages, use this property to specify which language should be shown by default. The value of this property must match one of the **srclang** values.  
 
@@ -67,6 +67,26 @@ The decision to include more than one file format is typically based on the brow
 >**mp3** (string): File name (including path) of the audio file. Path should be relative to the *src* folder (e.g., *course/en/audio/audio-1.mp3*).
 
 >**ogg** (string): File name (including path) of the audio file. Path should be relative to the *src* folder (e.g., *course/en/audio/audio-1.ogg*).
+
+**_videoInstruction** (object):  The video instruction attributes group contains values for **_isEnabled**, **_position**, **_hideOnRevisit**, **_first**, and **_revisit**.
+
+>**_isEnabled** (boolean): This determines if the video instruction functionality is used. This is false by default.
+
+>**_position** (number): This sets the verticle position of the instruction area from the top of the video as a percentage.
+
+>**_hideOnRevisit** (boolean): If set to True the instruction area will be hidden on re-visit.
+
+>**_first** (object):  The first attributes group contains values for **start**, and **end**.
+
+>>**start** (string): This text appears as the instruction text at the start of the video on first visit. If no text is provided, the instruction area will be hidden.
+
+>>**end** (string): This text appears as the instruction text at the end of the video on first visit. If no text is provided, the instruction area will be hidden.
+
+>**_revisit** (object):  The revisit attributes group contains values for **start**, and **end**.
+
+>>**start** (string): This text appears as the instruction text at the start of the video on revisit. If no text is provided, the instruction area will be hidden.
+
+>>**end** (string): This text appears as the instruction text at the end of the video on revisit. If no text is provided, the instruction area will be hidden.
 
 **_transcript** (object):  The transcript attributes group contains values for **_inlineTranscript**, **_externalTranscript**, **inlineTranscriptButton**, **inlineTranscriptCloseButton**, **inlineTranscriptBody**, **transcriptLinkButton**, and **transcriptLink**.
 
