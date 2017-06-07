@@ -32,12 +32,10 @@
     {{/if}}
     </div>
 
-    {{#if _videoInstruction}}
+    {{#if _videoInstruction._isEnabled}}
     <div class="media-instruction-container">
         <div class="{{_component}}-instruction video-instruction">
-            <div class="{{_component}}-instruction-inner component-instruction-inner">
-                {{{a11y_text}}}
-            </div>
+            <div class="{{_component}}-instruction-inner component-instruction-inner"></div>
         </div>
     </div>
     {{/if}}
