@@ -128,7 +128,8 @@
                 "default": "",
                 "title": "Caption File",
                 "inputType": "Asset:other",
-                "validators": ["required"]
+                "validators": ["required"],
+                "help": "This file should be in the .vtt file format"
               }
             }
           }
