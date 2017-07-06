@@ -226,7 +226,7 @@ define([
         },
 
         pageReady: function () {
-          this.$('.component-widget').on('inview', _.bind(this.inview, this));
+          this.$('.component-widget').on("onscreen", _.bind(this.onscreen, this));
         },
 
         onMediaElementPlay: function(event) {
@@ -264,7 +264,6 @@ define([
                 }
               }
             }
-
             this.firstRun = false;
         },
 
@@ -315,26 +314,20 @@ define([
             }
         },
 
-        inview: function(event, visible, visiblePartX, visiblePartY) {
-            if (visible) {
-                if (visiblePartY === 'top' || visiblePartY === 'both') {
-                    this._isVisibleTop = true;
-                } else {
-                    this._isVisibleTop = false;
+        onscreen: function(event, measurements) {
+
+            var isOnscreenY = measurements.percentFromTop < 70 && measurements.percentFromTop > 0;
+            var isOnscreenX = measurements.percentInviewHorizontal == 100;
+
+            if (isOnscreenY && isOnscreenX) {
+                if (this.model.get('_autoPlay') && this.notifyIsOpen == false && this.mediaCanAutoplay == true) {
+                    this.playMediaElement(true);
                 }
-                if (this._isVisibleTop) {
-                    if (this.model.get('_autoPlay') && this.notifyIsOpen == false && this.mediaCanAutoplay == true) {
-                        this.playMediaElement(true);
-                    }
-                    if (this.model.get('_setCompletionOn') == 'inview') {
-                        this.setCompletionStatus();
-                    }
-                    this.$('.component-inner').off('inview');
-                    this.videoIsInView = true;
-                } else {
-                    this.playMediaElement(false);
-                    this.videoIsInView = false;
+                if (this.model.get('_setCompletionOn') == 'inview') {
+                    this.setCompletionStatus();
                 }
+                this.$('.component-widget').off('onscreen');
+                this.videoIsInView = true;
             } else {
                 this.playMediaElement(false);
                 this.videoIsInView = false;
@@ -356,6 +349,8 @@ define([
         remove: function() {
             this.$('.mejs-overlay-button').off("click", this.onOverlayClick);
             this.$('.mejs-mediaelement').off("click", this.onMediaElementClick);
+
+            this.$('.component-widget').off('onscreen');
 
             var modelOptions = this.model.get('_playerOptions');
             delete modelOptions.success;
