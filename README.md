@@ -88,7 +88,9 @@ The decision to include more than one file format is typically based on the brow
 
 >>**end** (string): This text appears as the instruction text at the end of the video on revisit. If no text is provided, the instruction area will be hidden.
 
-**_transcript** (object):  The transcript attributes group contains values for **_inlineTranscript**, **_externalTranscript**, **inlineTranscriptButton**, **inlineTranscriptCloseButton**, **inlineTranscriptBody**, **transcriptLinkButton**, and **transcriptLink**.
+**_transcript** (object):  The transcript attributes group contains values for **_isEnabled**, **_setCompletionOnView**, **_inlineTranscript**, **_externalTranscript**, **inlineTranscriptButton**, **inlineTranscriptCloseButton**, **inlineTranscriptBody**, **transcriptLinkButton**, and **transcriptLink**.
+
+>**_isEnabled** (boolean): This determines if the video transcript functionality is used. This is false by default.
 
 >**_setCompletionOnView** (boolean): This determines if Adapt will register this component as having been completed by the user when the inline transcript is opened. This is true by default.
 
