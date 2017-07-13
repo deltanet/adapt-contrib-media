@@ -289,6 +289,14 @@
       "required":false,
       "title": "Transcript Options",
       "properties":{
+        "_isEnabled": {
+          "type":"boolean",
+          "required":false,
+          "default": false,
+          "title": "Is Enabled",
+          "inputType": { "type": "Boolean", "options": [false, true]},
+          "validators": []
+        },
         "_setCompletionOnView": {
           "type":"boolean",
           "required":false,
