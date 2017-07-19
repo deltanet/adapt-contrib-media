@@ -43,8 +43,8 @@ define([
           this.listenTo(this.model, 'change:_isComplete', this.checkCompletion);
 
             this.listenTo(Adapt, {
-                'popup:opened', this.notifyOpened,
-                'popup:closed', this.notifyClosed,
+                'popup:opened': this.notifyOpened,
+                'popup:closed': this.notifyClosed,
                 'device:resize': this.onScreenSizeChanged,
                 'device:changed': this.onDeviceChanged,
                 'accessibility:toggle': this.onAccessibilityToggle,
@@ -618,9 +618,13 @@ define([
 
         setVideoVolume: function() {
           if(Adapt.audio.audioStatus == 1){
-            this.mediaElement.setVolume(this.mediaElement.player.options.startVolume);
+            if(this.model.has('_startVolume')) {
+              this.mediaElement.player.setVolume(parseInt(this.model.get('_startVolume'))/100);
+            } else {
+              this.mediaElement.player.setVolume(this.mediaElement.player.options.startVolume);
+            }
           } else {
-            this.mediaElement.setVolume(0);
+            this.mediaElement.player.setVolume(0);
           }
         },
 
