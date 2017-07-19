@@ -18,6 +18,7 @@
     "_showVolumeControl":true,
     "_startVolume":"80%",
     "_playsinline": false,
+    "_preventForwardScrubbing": false,
     "_allowFullScreen":false,
     "_media": {
         "mp4": "course/assets/big_buck_bunny.mp4",
