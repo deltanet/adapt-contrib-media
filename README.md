@@ -9,7 +9,10 @@ It is a media playback component for audio and video. It uses HTML5 audio and vi
 The component uses [MediaElement.js (v2.21.2)](http://mediaelementjs.com/), a player with a number of useful features including subtitles and accessible (and CSS-skinnable) controls. [MediaElement.js](https://github.com/johndyer/mediaelement) carries the MIT license compatible with Adapt.  
 
 This component impliments an autoplay feature on top of the Adapt core media component. See the core media component wiki [Visit the **Media** wiki](https://github.com/adaptlearning/adapt-contrib-media/wiki) for more information about its functionality and for explanations of key properties.  
+=======
+[Visit the **Media** wiki](https://github.com/adaptlearning/adapt-contrib-media/wiki) for more information about its functionality and for explanations of key properties.  
 
+## Installation
 
 This plugin must be installed manually.
 
@@ -41,14 +44,20 @@ guide the learner’s interaction with the component.
 
 **_allowFullScreen** (boolean): Determines whether fullscreen mode is available or not. Note that changing this setting has no effect in Internet Explorer 9 as this browser does not support fullscreen mode for HTML video.  
 
-**_playsinline** (boolean): If set to `true`, videos will play 'inline' on iPhones (the same way they do on iPads). Note that this feature is only available in iOS10 and above. The default is `false`.  
+**_playsinline** (boolean): If set to `true`, videos will play 'inline' on iPhones (the same way they do on iPads). Note that this feature is only available in iOS10 and above. The default is `false`.    
+
+**_preventForwardScrubbing** (boolean): If enabled, will attempt to prevent users from skipping ahead in media (audio/video) unless '_isComplete' is marked as 'true'.  Users can skip backwards, and back up to the maxViewed time tracked by updateTime. Note: This does not apply to full screen iOS users and IE users may be able to circumvent this rule by using video play speed options in browser.  
 
 **_startLanguage** (string): If using closed captions with multiple languages, use this property to specify which language should be shown by default. The value of this property must match one of the **srclang** values.  
 
-**_media** (object): The media attributes group will contain different values depending on the type of media: video or audio.  
+**_showVolumeControl** (boolean): If enabled, the volume control will appear in the media player (Not supported on mobile devices)
+
+**_startVolume** (string): Defines the default volume as a percentage (Not supported on mobile devices).  This can be set with or without the percentage sign in the string
+
+**_media** (object): The media attributes group will contain different values depending on the type of media: video or audio.
 For video it contains values for **mp4**, **webm**, **ogv**, **poster**, and **cc**. The properties **mp4**, **webm** and **ogv** are all optional, but at least one is required (see below for alternate properties for YouTube/Vimeo video).  
 For audio it contains **mp3** and **ogg**. As with video, both are optional, but at least one is required.  
-The decision to include more than one file format is typically based on the browser/s used by the targeted audience. The mostly widely supported video file format is [mp4](http://caniuse.com/#feat=mpeg4) (specifically [H.264/MPEG-4 Part 10 AVC](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC)). The most widely supported audio format is mp3.
+The decision to include more than one file format is typically based on the browser/s used by the target audience. The most widely supported video file format is [mp4](http://caniuse.com/#feat=mpeg4) (specifically [H.264/MPEG-4 Part 10 AVC](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC)). The most widely supported audio format is mp3.
 
 >**mp4** (string): File name (including path) of the video file. Path should be relative to the *src* folder (e.g., *course/en/video/video-1.mp4*).
 
@@ -114,7 +123,6 @@ The decision to include more than one file format is typically based on the brow
 
 <div float align=right><a href="#top">Back to Top</a></div>
 
-
 ### JSON Examples  
 
 The attributes described above focus on the component's use with standard video. They are properly formatted as JSON in [*example.json*](https://github.com/adaptlearning/adapt-contrib-media/blob/master/example.json) The same model can be applied to the component's use with audio and YouTube videos.     
@@ -122,8 +130,7 @@ The attributes described above focus on the component's use with standard video.
 **Standard video example:**
 ```json
 "_media": {
-  "mp4": "course/en/video/video.mp4",
-  "ogv": "course/en/video/video.ogv"
+	"mp4": "course/en/video/video.mp4"
 },
 ```
 
@@ -154,6 +161,9 @@ The attributes described above focus on the component's use with standard video.
 ### Accessibility
 **Media** has two elements that have been assigned a label using the [aria-label](https://github.com/adaptlearning/adapt_framework/wiki/Aria-Labels) attribute: **ariaRegion** and **transcriptButton**. These labels are not visible elements. They are utilized by assistive technology such as screen readers. Should the label texts need to be customised, they can be found within the **globals** object in [*properties.schema*](https://github.com/adaptlearning/adapt-contrib-media/blob/master/properties.schema).   
 <div float align=right><a href="#top">Back to Top</a></div>
+
+## Events
+Whenever playback is initiated, the component will emit a `media:stop` event to notify other plugins that make use of audio or video that they should stop playback.
 
 ## Limitations
 

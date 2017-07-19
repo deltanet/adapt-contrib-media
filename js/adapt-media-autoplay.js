@@ -2,7 +2,8 @@ define([
     'core/js/adapt',
     'core/js/views/componentView',
     'libraries/mediaelement-and-player',
-    'libraries/mediaelement-and-player-accessible-captions'
+    'libraries/mediaelement-and-player-accessible-captions',
+    'libraries/mediaelement-fullscreen-hook'
 ], function(Adapt, ComponentView) {
 
     var froogaloopAdded = false;
@@ -39,15 +40,18 @@ define([
         },
 
         preRender: function() {
-            this.listenTo(Adapt, 'popup:closed', this.notifyClosed);
-            this.listenTo(Adapt, 'popup:opened', this.notifyOpened);
-            this.listenTo(this.model, 'change:_isComplete', this.checkCompletion);
+          this.listenTo(this.model, 'change:_isComplete', this.checkCompletion);
 
-            this.listenTo(Adapt, 'device:resize', this.onScreenSizeChanged);
-            this.listenTo(Adapt, 'device:changed', this.onDeviceChanged);
-            this.listenTo(Adapt, 'accessibility:toggle', this.onAccessibilityToggle);
+            this.listenTo(Adapt, {
+                'popup:opened', this.notifyOpened,
+                'popup:closed', this.notifyClosed,
+                'device:resize': this.onScreenSizeChanged,
+                'device:changed': this.onDeviceChanged,
+                'accessibility:toggle': this.onAccessibilityToggle,
+                'media:stop': this.onMediaStop
+            });
 
-            _.bindAll(this, 'onMediaElementPlay', 'onMediaElementPause', 'onMediaElementEnded');
+            _.bindAll(this, 'onMediaElementPlay', 'onMediaElementPause', 'onMediaElementEnded', 'onMediaElementTimeUpdate', 'onMediaElementSeeking');
 
             // set initial player state attributes
             this.model.set({
@@ -127,6 +131,9 @@ define([
                 }
                 if (this.model.get("_allowFullScreen") && !$("html").is(".ie9")) {
                     modelOptions.features.push('fullscreen');
+                }
+                if (this.model.get('_showVolumeControl')) {
+                    modelOptions.features.push('volume');
                 }
             }
 
@@ -213,6 +220,18 @@ define([
         setupEventListeners: function() {
             this.completionEvent = (!this.model.get('_setCompletionOn')) ? 'play' : this.model.get('_setCompletionOn');
 
+            if (this.completionEvent === 'inview') {
+                this.$('.component-widget').on('inview', _.bind(this.inview, this));
+            }
+
+            // wrapper to check if preventForwardScrubbing is turned on.
+            if ((this.model.get('_preventForwardScrubbing')) && (!this.model.get('_isComplete'))) {
+                $(this.mediaElement).on({
+                    'seeking': this.onMediaElementSeeking,
+                    'timeupdate': this.onMediaElementTimeUpdate
+                });
+            }
+
             // handle other completion events in the event Listeners
             $(this.mediaElement).on({
             	'play': this.onMediaElementPlay,
@@ -234,6 +253,9 @@ define([
         },
 
         onMediaElementPlay: function(event) {
+
+            Adapt.trigger("media:stop", this);
+
             this.model.set({
                 '_isMediaPlaying': true,
                 '_isMediaEnded': false
@@ -271,6 +293,26 @@ define([
             this.firstRun = false;
         },
 
+        onMediaElementSeeking: function(event) {
+            var maxViewed = this.model.get("_maxViewed");
+            if(!maxViewed) {
+                maxViewed = 0;
+            }
+            if (event.target.currentTime > maxViewed) {
+                event.target.currentTime = maxViewed;
+            }
+        },
+
+        onMediaElementTimeUpdate: function(event) {
+            var maxViewed = this.model.get("_maxViewed");
+            if (!maxViewed) {
+                maxViewed = 0;
+            }
+            if (event.target.currentTime > maxViewed) {
+                this.model.set("_maxViewed", event.target.currentTime);
+            }
+        },
+
         // Overrides the default play/pause functionality to stop accidental playing on touch devices
         setupPlayPauseToggle: function() {
             // bit sneaky, but we don't have a this.mediaElement.player ref on iOS devices
@@ -292,6 +334,17 @@ define([
 
             // pause on player click
             this.$('.mejs-mediaelement').on("click", this.onMediaElementClick);
+        },
+
+        onMediaStop: function(view) {
+
+            // Make sure this view isn't triggering media:stop
+            if (view && view.cid === this.cid) return;
+
+            var player = this.mediaElement.player;
+            if (!player) return;
+
+            player.pause();
         },
 
         onOverlayClick: function() {
@@ -386,9 +439,11 @@ define([
             if (this.mediaElement) {
                 this.mediaElement.removeEventListener('playing', this.onPlayMedia);
                 $(this.mediaElement).off({
-                	'play': this.onMediaElementPlay,
-                	'pause': this.onMediaElementPause,
-                	'ended': this.onMediaElementEnded
+                    'play': this.onMediaElementPlay,
+                    'pause': this.onMediaElementPause,
+                    'ended': this.onMediaElementEnded,
+                    'seeking': this.onMediaElementSeeking,
+                    'timeupdate': this.onMediaElementTimeUpdate
                 });
 
                 this.mediaElement.src = "";
@@ -425,6 +480,11 @@ define([
             }
 
             this.addThirdPartyAfterFixes();
+
+            if(this.model.has('_startVolume')) {
+                // Setting the start volume only works with the Flash-based player if you do it here rather than in setupPlayer
+                this.mediaElement.player.setVolume(parseInt(this.model.get('_startVolume'))/100);
+            }
 
             this.setReadyStatus();
             this.setupEventListeners();
