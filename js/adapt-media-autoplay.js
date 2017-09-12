@@ -617,14 +617,24 @@ define([
         },
 
         setVideoVolume: function() {
-          if(Adapt.audio.audioStatus == 1){
+          // Check for audio extension
+          if (Adapt.course.get("_audio") && Adapt.course.get("_audio")._isEnabled) {
+            // If audio is turned on
+            if(Adapt.audio.audioStatus == 1){
+              if(this.model.has('_startVolume')) {
+                this.mediaElement.player.setVolume(parseInt(this.model.get('_startVolume'))/100);
+              } else {
+                this.mediaElement.player.setVolume(this.mediaElement.player.options.startVolume);
+              }
+            } else {
+              this.mediaElement.player.setVolume(0);
+            }
+          } else {
             if(this.model.has('_startVolume')) {
               this.mediaElement.player.setVolume(parseInt(this.model.get('_startVolume'))/100);
             } else {
               this.mediaElement.player.setVolume(this.mediaElement.player.options.startVolume);
             }
-          } else {
-            this.mediaElement.player.setVolume(0);
           }
         },
 
