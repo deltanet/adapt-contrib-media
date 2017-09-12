@@ -14,6 +14,7 @@
     "_autoPlay":true,
     "_autoPlayOnce":true,
     "_useClosedCaptions":true,
+    "_showCaptionsButton":true,
     "_startLanguage":"en",
     "_showVolumeControl":true,
     "_startVolume":"80%",
@@ -54,6 +55,7 @@
         "_externalTranscript": false,
         "inlineTranscriptButton": "Transcript",
         "inlineTranscriptCloseButton": "Close Transcript",
+        "inlineTranscriptTitle": "Transcript",
         "inlineTranscriptBody": "Transcript body text should go here",
         "transcriptLinkButton": "Transcript",
         "transcriptLink": "assets/transcript.pdf"

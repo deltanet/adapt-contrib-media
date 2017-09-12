@@ -171,6 +171,14 @@
       "inputType": "Checkbox",
       "validators": []
     },
+    "_showCaptionsButton": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "title": "Show Closed Captions Button",
+      "inputType": "Checkbox",
+      "validators": []
+    },
     "_startLanguage": {
       "type": "string",
       "required": false,
@@ -356,14 +364,24 @@
           "validators": [],
           "translatable": true
         },
+        "inlineTranscriptTitle": {
+          "type": "string",
+          "required": false,
+          "default": "",
+          "title": "Inline Transcript Title",
+          "inputType": "Text",
+          "validators": [],
+          "help": "Optional text for the transcript tile",
+          "translatable": true
+        },
         "inlineTranscriptBody": {
           "type": "string",
           "required": false,
           "default": "",
-          "title": "Inline Transcript",
+          "title": "Inline Transcript Body",
           "inputType": "TextArea",
           "validators": [],
-          "help": "Optional text appears below the video",
+          "help": "Optional text for the transcript body",
           "translatable": true
         },
         "transcriptLinkButton": {

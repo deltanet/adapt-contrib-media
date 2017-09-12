@@ -42,6 +42,8 @@ guide the learner’s interaction with the component.
 
 **_useClosedCaptions** (boolean): If set to `true`, video will allow for Closed Captions and the **cc** object will be required. The default is `false`.  
 
+**_showCaptionsButton** (boolean): If set to `true`, video will show a button to control the Closed Captions. The default is `false`.  
+
 **_allowFullScreen** (boolean): Determines whether fullscreen mode is available or not. Note that changing this setting has no effect in Internet Explorer 9 as this browser does not support fullscreen mode for HTML video.  
 
 **_playsinline** (boolean): If set to `true`, videos will play 'inline' on iPhones (the same way they do on iPads). Note that this feature is only available in iOS10 and above. The default is `false`.    
@@ -97,7 +99,7 @@ The decision to include more than one file format is typically based on the brow
 
 >>**end** (string): This text appears as the instruction text at the end of the video on revisit. If no text is provided, the instruction area will be hidden.
 
-**_transcript** (object):  The transcript attributes group contains values for **_isEnabled**, **_setCompletionOnView**, **_inlineTranscript**, **_externalTranscript**, **inlineTranscriptButton**, **inlineTranscriptCloseButton**, **inlineTranscriptBody**, **transcriptLinkButton**, and **transcriptLink**.
+**_transcript** (object):  The transcript attributes group contains values for **_isEnabled**, **_setCompletionOnView**, **_inlineTranscript**, **_externalTranscript**, **inlineTranscriptButton**, **inlineTranscriptCloseButton**, **inlineTranscriptTitle**, **inlineTranscriptBody**, **transcriptLinkButton**, and **transcriptLink**.
 
 >**_isEnabled** (boolean): This determines if the video transcript functionality is used. This is false by default.
 
@@ -111,7 +113,9 @@ The decision to include more than one file format is typically based on the brow
 
 >**inlineTranscriptCloseButton** (string): This text appears on the button that toggles the visibility of the inline transcript. It is displayed when the inline transcript text is visible.
 
->**inlineTranscriptBody** (string): This optional text appears below the video. If provided, its visibility is toggled by clicking the transcript button. It is hidden by default.
+>**inlineTranscriptTitle** (string): This optional text appears as the notify title for the transcript.
+
+>**inlineTranscriptBody** (string): This optional text appears as the notify body for the transcript.
 
 >**transcriptLinkButton** (string): This text appears on the button that links to the optional external transcript. If no text is provided, the **transcriptLink** will be displayed on the button.
 
@@ -182,7 +186,7 @@ IE9 | Vimeo: ‘Sorry this video does not exist’.
 IE8 | <ul><li>Due to the lack of support for HTML audio/video, users will need to have [Adobe Flash Player](https://get.adobe.com/flashplayer/) v10 (or better) or Microsoft [Silverlight](https://www.microsoft.com/getsilverlight/get-started/install/) installed to enable media playback.</li><li>YouTube: control bar missing</li><li>YouTube/Vimeo: doesn’t track play/ended events</li></ul>
 
 ----------------------------
-**Version number:**  2.0.12
+**Version number:**  2.0.12  
 **Framework versions:** 2.0  
 **Author / maintainer:** Deltanet, plus forked code from Adapt Core Team, [contributors](https://github.com/deltanet/adapt-media-autoplay/graphs/contributors)  
 **Accessibility support:** To be reviewed.  

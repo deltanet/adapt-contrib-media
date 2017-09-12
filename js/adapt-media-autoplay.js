@@ -141,7 +141,9 @@ define([
 
             if (this.model.get('_useClosedCaptions')) {
                 modelOptions.startLanguage = this.model.get('_startLanguage') === undefined ? 'en' : this.model.get('_startLanguage');
-                this.setupSubtitles();
+                if (this.model.get('_showCaptionsButton')) {
+                  this.setupSubtitles();
+                }
             }
 
             var hasAccessibility = Adapt.config.has('_accessibility') && Adapt.config.get('_accessibility')._isActive
@@ -642,7 +644,7 @@ define([
           if(this.isPopupOpen) return;
 
           Adapt.trigger("notify:popup", {
-            title: this.model.get('_transcript').inlineTranscriptButton,
+            title: this.model.get('_transcript').inlineTranscriptTitle,
             body: this.model.get('_transcript').inlineTranscriptBody
           });
 
