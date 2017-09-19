@@ -2,19 +2,7 @@
     {{> component this}}
     <div class="media-widget component-widget a11y-ignore-aria">
 
-    <div class="media-options-container {{#if _transcript._isEnabled}}transcript-enabled{{/if}}">
-
-      {{#if _transcript._isEnabled}}
-        <div class="media-transcript-button-container">
-          {{#if _transcript._inlineTranscript}}
-            <button class="options-button icon icon-menu media-inline-transcript-button" role="button"></button>
-          {{/if}}
-          {{#if _transcript._externalTranscript}}
-            <button onclick="window.open('{{_transcript.transcriptLink}}')" class="options-button icon icon-menu media-external-transcript-button" role="button">
-              <div class="transcript-text-container"></button>
-          {{/if}}
-        </div>
-      {{/if}}
+    <div class="media-options-container">
 
       {{#if _showCaptionsButton}}
         <div class="media-subtitles-container">
@@ -33,6 +21,18 @@
               </button>
             {{/each}}
           </div>
+        </div>
+      {{/if}}
+
+      {{#if _transcript._isEnabled}}
+        <div class="media-transcript-button-container">
+          {{#if _transcript._inlineTranscript}}
+            <button class="options-button icon icon-menu media-inline-transcript-button" role="button"></button>
+          {{/if}}
+          {{#if _transcript._externalTranscript}}
+            <button onclick="window.open('{{_transcript.transcriptLink}}')" class="options-button icon icon-menu media-external-transcript-button" role="button">
+              <div class="transcript-text-container"></button>
+          {{/if}}
         </div>
       {{/if}}
 

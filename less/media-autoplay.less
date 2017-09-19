@@ -67,11 +67,9 @@
       z-index: 1;
       right: @component-padding;
       .dir-rtl & {
-
+        right: inherit;
+        left: @component-padding;
 			}
-      &.transcript-enabled {
-        z-index: 500;
-      }
     }
 
     .options-button {
@@ -81,6 +79,13 @@
       .dir-rtl & {
         float: left;
 			}
+    }
+
+    .media-subtitles-container {
+      float: left;
+      .dir-rtl & {
+        float: right;
+      }
     }
 
     .media-subtitles-options {
@@ -103,10 +108,11 @@
     .media-subtitles-option-icon {
       margin-right: @item-padding;
       color: @item-text-color;
+      float: left;
       .dir-rtl & {
         margin-left: @item-padding;
+        float: right;
       }
-      float: left;
     }
 
     .media-subtitles-option-title {
@@ -146,12 +152,10 @@
     }
 
     .media-transcript-button-container {
-        //padding:1px;
-    }
-
-    .media-external-transcript-button, .media-inline-transcript-button {
-        //width:100%;
-        //display:block;
+        float: left;
+        .dir-rtl & {
+          float: right;
+        }
     }
 
     .mejs-overlay-button {
