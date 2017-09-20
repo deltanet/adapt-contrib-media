@@ -191,7 +191,7 @@
     "_showVolumeControl": {
       "type": "boolean",
       "required": false,
-      "default": false,
+      "default": true,
       "title": "Show Volume Control (Not supported on mobile devices)",
       "inputType": "Checkbox",
       "validators": [],
