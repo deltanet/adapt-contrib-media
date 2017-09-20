@@ -242,9 +242,7 @@ define([
             });
 
             // Add listener for when the media is playing so the audio can be stopped
-            if (this.model.get('_audio') && this.model.get('_audio')._isEnabled) {
-                this.mediaElement.addEventListener('playing', _.bind(this.onPlayMedia, this));
-            }
+            this.mediaElement.addEventListener('playing', _.bind(this.onPlayMedia, this));
 
             this.listenTo(Adapt, "pageView:ready", this.pageReady);
             this.listenTo(Adapt, "audio:updateAudioStatus", this.setVideoVolume);
@@ -385,7 +383,6 @@ define([
                 if (this.model.get('_setCompletionOn') == 'inview') {
                     this.setCompletionStatus();
                 }
-                this.$('.component-widget').off('onscreen');
                 this.videoIsInView = true;
             } else {
                 this.playMediaElement(false);
@@ -457,9 +454,7 @@ define([
         },
 
         onPlayMedia: function() {
-            if (!Adapt.audio.audioClip[this.model.get('_audio')._channel].paused) {
-                Adapt.trigger('audio:pauseAudio', this.model.get('_audio')._channel);
-            }
+          Adapt.trigger('audio:stopAllChannels');
         },
 
         onDeviceChanged: function() {
