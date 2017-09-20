@@ -125,7 +125,7 @@ define([
 
             if (modelOptions.pluginPath === undefined) modelOptions.pluginPath = 'assets/';
             if(modelOptions.features === undefined) {
-                modelOptions.features = ['playpause','progress','current','duration', 'volume'];
+                modelOptions.features = ['playpause','progress','current','duration'];
                 if (this.model.get('_useClosedCaptions')) {
                     modelOptions.features.unshift('tracks');
                 }
