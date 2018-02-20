@@ -43,8 +43,6 @@ define([
           this.listenTo(this.model, 'change:_isComplete', this.checkCompletion);
 
             this.listenTo(Adapt, {
-                'popup:opened': this.notifyOpened,
-                'popup:closed': this.notifyClosed,
                 'device:resize': this.onScreenSizeChanged,
                 'device:changed': this.onDeviceChanged,
                 'accessibility:toggle': this.onAccessibilityToggle,
@@ -58,6 +56,9 @@ define([
                 '_isMediaEnded': false,
                 '_isMediaPlaying': false
             });
+
+            this.firstRun = true;
+            this.notifyIsOpen = false;
 
             if (this.model.get('_media').source) {
                 // Remove the protocol for streaming service.
@@ -79,10 +80,6 @@ define([
               if(this.model.get('_videoInstruction')._isEnabled) {
                 this.setupInstructions();
               }
-            }
-            // Check if notify is visible
-            if ($('body').children('.notify').css('visibility') == 'visible') {
-                this.notifyOpened();
             }
         },
 
@@ -180,8 +177,6 @@ define([
                 }
             }, this));
 
-            this.firstRun = true;
-            this.notifyIsOpen = false;
             this.mediaAutoplayOnce = this.model.get('_autoPlayOnce');
             this.mediaCanAutoplay = this.model.get('_autoPlay');
 
@@ -244,8 +239,12 @@ define([
             // Add listener for when the media is playing so the audio can be stopped
             this.mediaElement.addEventListener('playing', _.bind(this.onPlayMedia, this));
 
-            this.listenTo(Adapt, "pageView:ready", this.pageReady);
-            this.listenTo(Adapt, "audio:updateAudioStatus", this.setVideoVolume);
+            this.listenTo(Adapt, {
+                'popup:opened': this.notifyOpened,
+                'popup:closed': this.notifyClosed,
+                'pageView:ready': this.pageReady,
+                'audio:updateAudioStatus': this.setVideoVolume
+            });
         },
 
         pageReady: function () {
@@ -485,6 +484,11 @@ define([
 
             this.setReadyStatus();
             this.setupEventListeners();
+
+            // Check if notify is visible
+            if ($('body').children('.notify').css('visibility') == 'visible') {
+                this.notifyOpened();
+            }
         },
 
         positionInstruction: function () {
