@@ -493,7 +493,7 @@ define([
 
         positionInstruction: function () {
           this.$('.media-instruction-container').css({
-            top: this.instructionPosition,
+            top: this.instructionPosition+'%',
             width: this.$('.component-widget').width()
           });
         },

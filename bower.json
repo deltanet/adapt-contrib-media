@@ -1,16 +1,11 @@
 {
   "name": "adapt-media-autoplay",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "framework": "^2.0.4",
   "homepage": "https://github.com/deltanet/adapt-media-autoplay",
   "issues": "https://github.com/deltanet/adapt-media-autoplay/issues",
   "displayName": "Media Auto Play",
   "component": "media-autoplay",
-  "assetFields" : [
-    "_media.ogv",
-    "_media.mp4",
-    "_media.poster"
-  ],
   "description": "Playback of video and audio with a Flash Player fallback for IE8+ with the option to auto play",
   "main": "/js/adapt-media-autoplay.js",
   "keywords": [
