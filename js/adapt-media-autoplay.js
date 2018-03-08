@@ -218,7 +218,7 @@ define([
             this.completionEvent = (!this.model.get('_setCompletionOn')) ? 'play' : this.model.get('_setCompletionOn');
 
             if (this.completionEvent === 'inview') {
-                this.$('.component-widget').on('inview', _.bind(this.inview, this));
+                this.$('.component-widget').on('onscreen', _.bind(this.onscreen, this));
             }
 
             // wrapper to check if preventForwardScrubbing is turned on.
