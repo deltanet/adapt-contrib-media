@@ -7,7 +7,7 @@
       {{#if _showCaptionsButton}}
         <div class="media-subtitles-container">
           <div class="media-subtitles-button-container">
-            <button class="options-button icon icon-comment media-subtitles-button" role="button"></button>
+            <button class="options-button icon icon-comment media-subtitles-button" aria-label="{{_globals._components._media-autoplay.ariaCaptionsLabel}}"></button>
           </div>
           <div class="media-subtitles-options">
             <button class="media-subtitles-option" srclang="none" role="button">
@@ -27,10 +27,10 @@
       {{#if _transcript._isEnabled}}
         <div class="media-transcript-button-container">
           {{#if _transcript._inlineTranscript}}
-            <button class="options-button icon icon-menu media-inline-transcript-button" role="button"></button>
+            <button class="options-button icon icon-menu media-inline-transcript-button" aria-label="{{_globals._components._media-autoplay.ariaTranscriptLabel}}"></button>
           {{/if}}
           {{#if _transcript._externalTranscript}}
-            <button onclick="window.open('{{_transcript.transcriptLink}}')" class="options-button icon icon-menu media-external-transcript-button" role="button">
+            <button onclick="window.open('{{_transcript.transcriptLink}}')" class="options-button icon icon-menu media-external-transcript-button" aria-label="{{_globals._components._media-autoplay.ariaTranscriptLabel}}">
               <div class="transcript-text-container"></button>
           {{/if}}
         </div>

@@ -19,6 +19,22 @@
       "inputType": "Text",
       "validators": [],
       "translatable": true
+    },
+    "ariaTranscriptLabel": {
+      "type": "string",
+      "required": false,
+      "default": "Transcript",
+      "inputType": "Text",
+      "validators": [],
+      "translatable": true
+    },
+    "ariaCaptionsLabel": {
+      "type": "string",
+      "required": false,
+      "default": "Subtitles",
+      "inputType": "Text",
+      "validators": [],
+      "translatable": true
     }
   },
   "properties": {
