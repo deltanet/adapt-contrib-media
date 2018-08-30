@@ -274,7 +274,7 @@ define([
         onMediaElementPause: function(event) {
             this.model.set('_isMediaPlaying', false);
 
-            if (this.model.get("_showReplayOverlay")) {
+            if (this.model.has("_showReplayOverlay") && this.model.get("_showReplayOverlay")) {
               this.$('.mejs-overlay-button').removeClass("replay");
             }
         },
@@ -282,7 +282,7 @@ define([
         onMediaElementEnded: function(event) {
             this.model.set('_isMediaEnded', true);
 
-            if (this.model.get("_showReplayOverlay")) {
+            if (this.model.has("_showReplayOverlay") && this.model.get("_showReplayOverlay")) {
               this.$('.mejs-overlay-button').addClass("replay");
             }
 

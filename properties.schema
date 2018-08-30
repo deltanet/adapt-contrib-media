@@ -220,7 +220,7 @@
       "title": "Show Replay Button",
       "inputType": "Checkbox",
       "validators": [],
-      "help": "When enabled, the play button will be replayed with a replay button."
+      "help": "When enabled, the play button will be replaced with a replay button."
     },
     "_startVolume": {
       "type":"string",
