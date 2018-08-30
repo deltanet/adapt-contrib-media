@@ -213,6 +213,15 @@
       "validators": [],
       "help": "When enabled, the volume control will appear in the media player. On mobile devices the audio level is controlled the device's physical volume controls."
     },
+    "_showReplayOverlay": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "title": "Show Replay Button",
+      "inputType": "Checkbox",
+      "validators": [],
+      "help": "When enabled, the play button will be replaced with a replay button."
+    },
     "_startVolume": {
       "type":"string",
       "required": false,

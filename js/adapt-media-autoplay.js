@@ -273,10 +273,18 @@ define([
 
         onMediaElementPause: function(event) {
             this.model.set('_isMediaPlaying', false);
+
+            if (this.model.has("_showReplayOverlay") && this.model.get("_showReplayOverlay")) {
+              this.$('.mejs-overlay-button').removeClass("replay");
+            }
         },
 
         onMediaElementEnded: function(event) {
             this.model.set('_isMediaEnded', true);
+
+            if (this.model.has("_showReplayOverlay") && this.model.get("_showReplayOverlay")) {
+              this.$('.mejs-overlay-button').addClass("replay");
+            }
 
             if (this.completionEvent === 'ended') {
                 this.setCompletionStatus();
@@ -532,6 +540,7 @@ define([
         },
 
         showInstruction: function () {
+
           this.$('.media-instruction-container').css({ top: (this.instructionPosition - 20)+'%'});
           this.$('.video-instruction').show();
           if(Adapt.config.get('_disableAnimation')) {
