@@ -17,6 +17,7 @@
     "_showCaptionsButton":true,
     "_startLanguage":"en",
     "_showVolumeControl":true,
+    "_showReplayOverlay":true,
     "_startVolume":"80%",
     "_playsinline": false,
     "_allowFullScreen":false,

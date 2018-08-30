@@ -532,6 +532,10 @@ define([
         },
 
         showInstruction: function () {
+          if (this.model.get("_showReplayOverlay")) {
+            this.$('.mejs-overlay-button').addClass("replay");
+          }
+
           this.$('.media-instruction-container').css({ top: (this.instructionPosition - 20)+'%'});
           this.$('.video-instruction').show();
           if(Adapt.config.get('_disableAnimation')) {
