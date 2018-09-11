@@ -54,7 +54,7 @@ guide the learner’s interaction with the component.
 
 **_showVolumeControl** (boolean): If enabled, the volume control will appear in the media player (Not supported on mobile devices)
 
-**_showReplayOverlay** (boolean): When enabled, the play button will be replaced with a replay button.
+**_showReplayOverlay** (boolean): When enabled, the play button will be replaced with a replay button after the video has completed.
 
 **_startVolume** (string): Defines the default volume as a percentage (Not supported on mobile devices).  This can be set with or without the percentage sign in the string
 
