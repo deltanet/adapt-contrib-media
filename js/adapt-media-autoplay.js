@@ -273,10 +273,6 @@ define([
 
         onMediaElementPause: function(event) {
             this.model.set('_isMediaPlaying', false);
-
-            if (this.model.has("_showReplayOverlay") && this.model.get("_showReplayOverlay")) {
-              this.$('.mejs-overlay-button').removeClass("replay");
-            }
         },
 
         onMediaElementEnded: function(event) {
