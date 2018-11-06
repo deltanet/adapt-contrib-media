@@ -496,10 +496,18 @@ define([
         },
 
         positionInstruction: function () {
+          var position = 50;
+
+          if (Adapt.device.screenSize === 'large') {
+            position = this.instructionPosition;
+          }
+
           this.$('.media-instruction-container').css({
-            top: this.instructionPosition+'%',
+            top: position+'%',
             width: this.$('.component-widget').width()
           });
+
+          this.$('.media-instruction-container').css('margin-top', -(this.$('.media-instruction-container').outerHeight() / 2));
         },
 
         checkCompletion: function () {
@@ -536,13 +544,21 @@ define([
         },
 
         showInstruction: function () {
+          var position = 50;
 
-          this.$('.media-instruction-container').css({ top: (this.instructionPosition - 20)+'%'});
+          if (Adapt.device.screenSize === 'large') {
+            position = this.instructionPosition;
+          }
+
+          this.$('.media-instruction-container').css('margin-top', -(this.$('.media-instruction-container').outerHeight() / 2));
+
+          this.$('.media-instruction-container').css({ top: (position - 20)+'%'});
           this.$('.video-instruction').show();
-          if(Adapt.config.get('_disableAnimation')) {
-            this.$('.media-instruction-container').css({ top: this.instructionPosition+'%'});
+
+          if (Adapt.config.get('_disableAnimation')) {
+            this.$('.media-instruction-container').css({ top: position+'%'});
           } else {
-            this.$('.media-instruction-container').animate({ top: this.instructionPosition+'%'}, 500);
+            this.$('.media-instruction-container').animate({ top: position+'%'}, 500);
           }
         },
 
