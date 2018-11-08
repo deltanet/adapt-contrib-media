@@ -195,6 +195,22 @@
       "inputType": "Checkbox",
       "validators": []
     },
+    "_closedCaptionsIcon": {
+      "type": "string",
+      "required": false,
+      "default": "icon-cc",
+      "title": "Closed Captions Icon",
+      "inputType": "Text",
+      "validators": []
+    },
+    "closedCaptionsNoneButton": {
+      "type": "string",
+      "required": false,
+      "default": "None",
+      "title": "Closed Captions None Button",
+      "inputType": "Text",
+      "validators": []
+    },
     "_startLanguage": {
       "type": "string",
       "required": false,

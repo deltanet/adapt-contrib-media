@@ -21,6 +21,8 @@
     "_startVolume":"80%",
     "_playsinline": false,
     "_allowFullScreen":false,
+    "closedCaptionsNoneButton": "None",
+    "_closedCaptionsIcon": "icon-cc",
     "_media": {
         "mp4": "course/assets/big_buck_bunny.mp4",
         "ogv": "course/assets/big_buck_bunny.ogv",

@@ -33,8 +33,7 @@ The attributes listed below are used in *components.json* to configure **Media**
 
 **_layout** (string): This defines the horizontal position of the component in the block. Acceptable values are `full`, `left` or `right`.  
 
-**instruction** (string): This optional text appears above the component. It is frequently used to
-guide the learner’s interaction with the component.  
+**instruction** (string): This optional text appears above the component. It is frequently used to guide the learner’s interaction with the component.  
 
 **_setCompletionOn** (string): This determines when Adapt will register this component as having been completed by the user. Acceptable values are `inview` (triggered when the component is fully displayed within the viewport), `play` (triggered when playback is initiated), or `ended` (triggered when the video has reached the end of playback).
 
@@ -80,6 +79,10 @@ The decision to include more than one file format is typically based on the brow
 >**mp3** (string): File name (including path) of the audio file. Path should be relative to the *src* folder (e.g., *course/en/audio/audio-1.mp3*).
 
 >**ogg** (string): File name (including path) of the audio file. Path should be relative to the *src* folder (e.g., *course/en/audio/audio-1.ogg*).
+
+**_closedCaptionsIcon** (string): CSS class name for the icon to be shown on the Closed Captions button.
+
+**closedCaptionsNoneButton** (string): This text appears on the button that set the Closed Caption to none.
 
 **_videoInstruction** (object):  The video instruction attributes group contains values for **_isEnabled**, **_position**, **_hideOnRevisit**, **_first**, and **_revisit**.
 

@@ -694,6 +694,26 @@ define([
         },
 
         onSubtitlesClicked: function() {
+          var langs = this.model.get('_media').cc;
+          var numLangs = langs.length;
+          // Check if only one language is in the list
+          if (numLangs < 2) {
+            if (this.captionsAreOn) {
+              var lang = 'none';
+              this.captionsAreOn = false;
+              this.$(".media-subtitles-button").addClass('cc-off');
+            } else {
+              var lang = this.model.get('_startLanguage');
+              this.captionsAreOn = true;
+              this.$(".media-subtitles-button").removeClass('cc-off');
+            }
+            this.updateSubtitlesTrack(lang);
+          } else {
+            this.toggleSubtitlesMenu();
+          }
+        },
+
+        toggleSubtitlesMenu: function() {
           if ($('html').is(".ie8") || $('html').is(".iPhone.version-7\\.0")) {
             this.$(".media-subtitles-options").css("display", "block");
           } else {
@@ -706,7 +726,8 @@ define([
 
           var $link = $(event.currentTarget);
           var lang = $link.attr('srclang');
-          this.mediaElement.player.setTrack(lang);
+
+          this.updateSubtitlesTrack(lang);
 
           // Update mediaplayer CC menu
           this.$(".mejs-captions-selector").find("input[type=checkbox]").prop("checked", false);
@@ -724,7 +745,13 @@ define([
           }
         },
 
+        updateSubtitlesTrack: function(lang) {
+          this.mediaElement.player.setTrack(lang);
+        },
+
         setupSubtitles: function() {
+          this.captionsAreOn = true;
+
           var lang = this.model.get('_startLanguage') === undefined ? 'en' : this.model.get('_startLanguage');
 
           var $link = this.$(".media-subtitles-options").find("button[srclang="+lang+"]");

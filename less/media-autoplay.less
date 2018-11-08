@@ -88,6 +88,12 @@
       }
     }
 
+    .media-subtitles-button {
+      &.cc-off {
+        color: @button-text-color-disabled;
+      }
+    }
+
     .media-subtitles-options {
       display: none;
       float: right;
@@ -228,4 +234,19 @@
 //for use when no title or body or instruction is available
 .media-top-padding {
     padding-top: 4em;
+}
+
+@font-face {
+	font-family: 'closedcaptions';
+	src: url('fonts/closedcaptions.eot?');
+	src: url('fonts/closedcaptions.eot?#iefix') format('embedded-opentype'),
+	     url('fonts/closedcaptions.woff?') format('woff'),
+	     url('fonts/closedcaptions.ttf?') format('truetype'),
+	     url('fonts/closedcaptions.svg?1#closedcaptions') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+.icon-cc:before {
+	font-family: 'closedcaptions';
+	content: '\e901';
 }

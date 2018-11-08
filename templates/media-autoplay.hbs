@@ -7,12 +7,12 @@
       {{#if _showCaptionsButton}}
         <div class="media-subtitles-container">
           <div class="media-subtitles-button-container">
-            <button class="options-button icon icon-comment media-subtitles-button" aria-label="{{_globals._components._media-autoplay.ariaCaptionsLabel}}"></button>
+            <button class="options-button icon {{#if _closedCaptionsIcon}}{{_closedCaptionsIcon}}{{else}}icon-comment{{/if}} media-subtitles-button" aria-label="{{_globals._components._media-autoplay.ariaCaptionsLabel}}"></button>
           </div>
           <div class="media-subtitles-options">
             <button class="media-subtitles-option" srclang="none" role="button">
               <div class="media-subtitles-option-icon icon icon-radio-unchecked"></div>
-              <div class="media-subtitles-option-title">None</div>
+              <div class="media-subtitles-option-title">{{#if closedCaptionsNoneButton}}{{closedCaptionsNoneButton}}{{else}}None{{/if}}</div>
             </button>
             {{#each _media.cc}}
               <button class="media-subtitles-option" srclang="{{srclang}}" role="button">
