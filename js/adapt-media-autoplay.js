@@ -91,7 +91,9 @@ define([
         notifyClosed: function() {
             this.notifyIsOpen = false;
             if (this.videoIsInView == true && this.mediaCanAutoplay && this.firstRun) {
-                this.playMediaElement(true);
+              _.delay(_.bind(function() {
+                  this.playMediaElement(true);
+              }, this), 400);
             }
         },
 
@@ -394,6 +396,8 @@ define([
         },
 
         playMediaElement: function(state) {
+            if (!this.mediaElement) return;
+
             if (this.model.get('_isVisible') && state) {
                 this.mediaElement.play();
                 // Set to false to stop autoplay when inview again
