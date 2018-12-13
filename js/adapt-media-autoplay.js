@@ -377,8 +377,7 @@ define([
         },
 
         onscreen: function(event, measurements) {
-
-            var isOnscreenY = measurements.percentFromTop < 70 && measurements.percentFromTop > 0;
+            var isOnscreenY = measurements.percentFromTop < 60 && measurements.percentFromTop > -40;
             var isOnscreenX = measurements.percentInviewHorizontal == 100;
 
             if (isOnscreenY && isOnscreenX) {
