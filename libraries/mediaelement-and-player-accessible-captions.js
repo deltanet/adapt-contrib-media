@@ -544,6 +544,8 @@ define([
       et:'Eesti keel',
       artn:'العربية (تونس)',
       ptbr:'Português (Brasil)',
+      he:'עִברִית',
+      mr:'मराठी',
       //
 			af:'Afrikaans',
 			sq:'Albanian',
