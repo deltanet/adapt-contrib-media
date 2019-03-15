@@ -45,8 +45,7 @@ define([
             this.listenTo(Adapt, {
                 'device:resize': this.onScreenSizeChanged,
                 'device:changed': this.onDeviceChanged,
-                'accessibility:toggle': this.onAccessibilityToggle,
-                'media:stop': this.onMediaStop
+                'accessibility:toggle': this.onAccessibilityToggle
             });
 
             _.bindAll(this, 'onMediaElementPlay', 'onMediaElementPause', 'onMediaElementEnded', 'onMediaElementTimeUpdate', 'onMediaElementSeeking');
@@ -81,6 +80,8 @@ define([
                 this.setupInstructions();
               }
             }
+
+            this.listenTo(Adapt, 'media:stop', this.onMediaStop);
         },
 
         notifyOpened: function() {
