@@ -343,6 +343,7 @@ define([
         },
 
         onMediaStop: function(view) {
+            if (!this.mediaElement) return;
 
             // Make sure this view isn't triggering media:stop
             if (view && view.cid === this.cid) return;
@@ -643,6 +644,7 @@ define([
         },
 
         setVideoVolume: function() {
+          if (!this.mediaElement) return;
           // Check for audio extension
           if (Adapt.course.get("_audio") && Adapt.course.get("_audio")._isEnabled) {
             // If audio is turned on
