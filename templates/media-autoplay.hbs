@@ -27,7 +27,11 @@
       {{#if _transcript._isEnabled}}
         <div class="media-transcript-button-container">
           {{#if _transcript._inlineTranscript}}
-            <button class="options-button icon icon-menu media-inline-transcript-button" aria-label="{{_globals._components._media-autoplay.ariaTranscriptLabel}}"></button>
+            {{#if _transcript.inlineTranscriptButton}}
+              <button class="options-button media-inline-transcript-button" aria-label="{{_globals._components._media-autoplay.ariaTranscriptLabel}}">{{_transcript.inlineTranscriptButton}}</button>
+            {{else}}
+              <button class="options-button icon icon-menu media-inline-transcript-button" aria-label="{{_globals._components._media-autoplay.ariaTranscriptLabel}}"></button>
+            {{/if}}
           {{/if}}
           {{#if _transcript._externalTranscript}}
             <button onclick="window.open('{{_transcript.transcriptLink}}')" class="options-button icon icon-menu media-external-transcript-button" aria-label="{{_globals._components._media-autoplay.ariaTranscriptLabel}}">
