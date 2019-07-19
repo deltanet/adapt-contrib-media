@@ -1,4 +1,4 @@
-<div class="media-autoplay-inner component-inner" role="region" aria-label="{{_globals._components._media-autoplay.ariaRegion}} {{#if _media.transcriptLink}}{{_globals._components._media-autoplay.transcriptButton}}{{/if}}" {{#if _globals._components._media-autoplay.ariaRegion}}tabindex="0"{{/if}}>
+<div class="media-autoplay-inner component-inner" role="region" aria-label="{{_globals._components._media-autoplay.ariaRegion}} {{#if _media.transcriptLink}}{{_globals._components._media-autoplay.transcriptButton}}{{/if}}">
     {{> component this}}
     <div class="media-widget component-widget a11y-ignore-aria">
 
@@ -10,12 +10,12 @@
             <button class="options-button icon {{#if _closedCaptionsIcon}}{{_closedCaptionsIcon}}{{else}}icon-comment{{/if}} media-subtitles-button" aria-label="{{_globals._components._media-autoplay.ariaCaptionsLabel}}"></button>
           </div>
           <div class="media-subtitles-options">
-            <button class="media-subtitles-option" srclang="none" role="button">
+            <button class="media-subtitles-option" srclang="none">
               <div class="media-subtitles-option-icon icon icon-radio-unchecked"></div>
               <div class="media-subtitles-option-title">{{#if closedCaptionsNoneButton}}{{closedCaptionsNoneButton}}{{else}}None{{/if}}</div>
             </button>
             {{#each _media.cc}}
-              <button class="media-subtitles-option" srclang="{{srclang}}" role="button">
+              <button class="media-subtitles-option" srclang="{{srclang}}">
                 <div class="media-subtitles-option-icon icon icon-radio-unchecked"></div>
                 <div class="media-subtitles-option-title">{{srclang}}</div>
               </button>

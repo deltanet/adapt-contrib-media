@@ -146,15 +146,6 @@ define([
                 }
             }
 
-            var hasAccessibility = Adapt.config.has('_accessibility') && Adapt.config.get('_accessibility')._isActive
-                ? true
-                : false;
-
-            if (hasAccessibility) {
-                modelOptions.alwaysShowControls = true;
-                modelOptions.hideVideoControlsOnLoad = false;
-            }
-
             if (modelOptions.alwaysShowControls === undefined) {
                 modelOptions.alwaysShowControls = false;
             }
