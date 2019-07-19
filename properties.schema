@@ -7,15 +7,15 @@
     "ariaRegion": {
       "type": "string",
       "required": true,
-      "default": "This is a media player component. Select the play / pause button to watch or listen.",
+      "default": "Media player{{#any _transcript._inlineTranscript _transcript._externalTranscript}} and transcript{{/any}}.",
       "inputType": "Text",
       "validators": [],
       "translatable": true
     },
-    "transcriptButton": {
+    "skipToTranscript": {
       "type": "string",
-      "required": false,
-      "default": "Alternatively you can select the link below for the transcript.",
+      "required": true,
+      "default": "Skip to transcript",
       "inputType": "Text",
       "validators": [],
       "translatable": true
@@ -253,6 +253,14 @@
       "required": false,
       "default": false,
       "title": "Allow Full Screen",
+      "inputType": "Checkbox",
+      "validators": []
+    },
+    "_pauseWhenOffScreen": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "title": "Pause playback when video is no longer in view.",
       "inputType": "Checkbox",
       "validators": []
     },
