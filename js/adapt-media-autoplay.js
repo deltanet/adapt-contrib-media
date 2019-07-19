@@ -53,9 +53,11 @@ define([
     var MediaAutoplay = ComponentView.extend({
 
         events: {
-            "click .media-inline-transcript-button": "onToggleInlineTranscript",
+            "click .media-inline-transcript-button": "initNotify",
             "click .media-external-transcript-button": "onExternalTranscriptClicked",
-            "click .js-skip-to-transcript": "onSkipToTranscript"
+            "click .js-skip-to-transcript": "onSkipToTranscript",
+            "click .media-subtitles-button": "onSubtitlesClicked",
+            "click .media-subtitles-option": "onSubtitlesOptionClicked"
         },
 
         className: function() {
@@ -73,7 +75,10 @@ define([
             this.listenTo(Adapt, {
                 'device:resize': this.onScreenSizeChanged,
                 'device:changed': this.onDeviceChanged,
-                'media:stop': this.onMediaStop
+                'popup:opened': this.notifyOpened,
+                'popup:closed': this.notifyClosed,
+                'media:stop': this.onMediaStop,
+                'pageView:ready': this.pageReady
             });
 
             _.bindAll(this, 'onMediaElementPlay', 'onMediaElementPause', 'onMediaElementEnded', 'onMediaElementTimeUpdate', 'onMediaElementSeeking');
@@ -147,6 +152,11 @@ define([
           }
         },
 
+        pageReady: function () {
+          console.log('pageReady');
+          this.$('.component-widget').on("onscreen", _.bind(this.onscreen, this));
+        },
+
         setupPlayer: function() {
             if (!this.model.get('_playerOptions')) this.model.set('_playerOptions', {});
 
@@ -180,6 +190,9 @@ define([
                     Adapt.offlineStorage.set('captions', startLanguage);
                 }
                 modelOptions.startLanguage = this.checkForSupportedCCLanguage(Adapt.offlineStorage.get('captions'));
+                if (this.model.get('_showCaptionsButton')) {
+                  this.setupSubtitles();
+                }
             }
 
             if (modelOptions.alwaysShowControls === undefined) {
@@ -290,7 +303,7 @@ define([
             if(!this.model.get('_useClosedCaptions')) return;
 
             var selector = this.model.get('_playerOptions').toggleCaptionsButtonWhenOnlyOne ?
-                '.mejs-captions-button button' :
+                '.media-subtitles-button button' :
                 '.mejs-captions-selector';
 
             this.$(selector).on('click.mediaCaptionsChange', _.debounce(function() {
@@ -472,11 +485,13 @@ define([
         },
 
         onscreen: function(event, measurements) {
+          console.log('onscreen');
             var isOnscreenY = (measurements.percentFromTop < 50) && (measurements.percentFromTop > -10);
             var isOnscreenX = measurements.percentInviewHorizontal == 100;
 
             if (isOnscreenY && isOnscreenX) {
                 if (this.model.get('_autoPlay') && this.notifyIsOpen == false && this.mediaCanAutoplay == true) {
+                  console.log('play media');
                     this.playMediaElement(true);
                 }
                 if (this.model.get('_setCompletionOn') == 'inview') {
@@ -509,7 +524,7 @@ define([
 
             if(this.model.get('_useClosedCaptions')) {
                 var selector = this.model.get('_playerOptions').toggleCaptionsButtonWhenOnlyOne ?
-                '.mejs-captions-button button' :
+                '.media-subtitles-button button' :
                 '.mejs-captions-selector';
                 this.$(selector).off('click.mediaCaptionsChange');
             }
@@ -686,36 +701,6 @@ define([
             }.bind(this), 250);
         },
 
-        onToggleInlineTranscript: function(event) {
-            if (event) event.preventDefault();
-            var $transcriptBodyContainer = this.$(".media-inline-transcript-body-container");
-            var $button = this.$(".media-inline-transcript-button");
-            var $buttonText = this.$(".media-inline-transcript-button .transcript-text-container");
-
-            if ($transcriptBodyContainer.hasClass("inline-transcript-open")) {
-                $transcriptBodyContainer.stop(true,true).slideUp(function() {
-                    $(window).resize();
-                });
-                $button.attr('aria-expanded', false);
-                $transcriptBodyContainer.removeClass("inline-transcript-open");
-                $buttonText.html(this.model.get("_transcript").inlineTranscriptButton);
-            } else {
-                $transcriptBodyContainer.stop(true,true).slideDown(function() {
-                    $(window).resize();
-                });
-                $button.attr('aria-expanded', true);
-                $transcriptBodyContainer.addClass("inline-transcript-open");
-                $buttonText.html(this.model.get("_transcript").inlineTranscriptCloseButton);
-
-                if (this.model.get('_transcript')._setCompletionOnView !== false) {
-                    this.setCompletionStatus();
-                }
-            }
-            _.delay(_.bind(function() {
-                Adapt.trigger('device:resize');
-            }, this), 300);
-        },
-
         onExternalTranscriptClicked: function(event) {
             if (this.model.get('_transcript')._setCompletionOnView !== false) {
                 this.setCompletionStatus();
@@ -782,6 +767,102 @@ define([
                 src: this.mediaElement.src,
                 platform: this.mediaElement.pluginType
             });
+        },
+
+        onSubtitlesClicked: function() {
+          console.log('onSubtitlesClicked clicked... ' + this.captionsAreOn);
+          var langs = this.model.get('_media').cc;
+          var numLangs = langs.length;
+          // Check if only one language is in the list
+          if (numLangs < 2) {
+            if (this.captionsAreOn) {
+              var lang = 'none';
+              this.captionsAreOn = false;
+              this.$(".media-subtitles-button").addClass('cc-off');
+            } else {
+              var lang = this.model.get('_startLanguage');
+              this.captionsAreOn = true;
+              this.$(".media-subtitles-button").removeClass('cc-off');
+            }
+            this.updateSubtitlesTrack(lang);
+          } else {
+            this.$('.media-subtitles-options').slideToggle(300);
+          }
+        },
+
+        updateSubtitlesTrack: function(lang) {
+          this.mediaElement.player.setTrack(lang);
+        },
+
+        initNotify: function() {
+          if(this.isPopupOpen) return;
+
+          Adapt.trigger("notify:popup", {
+            title: this.model.get('_transcript').inlineTranscriptTitle,
+            body: this.model.get('_transcript').inlineTranscriptBody
+          });
+
+          this.isPopupOpen = true;
+
+          if (this.model.get('_transcript')._setCompletionOnView !== false) {
+            this.setCompletionStatus();
+          }
+
+          Adapt.once("notify:closed", _.bind(function() {
+            this.isPopupOpen = false;
+          }, this));
+        },
+
+        onSubtitlesOptionClicked: function(event) {
+          if (event) event.preventDefault();
+
+          var $link = $(event.currentTarget);
+          var lang = $link.attr('srclang');
+
+          this.updateSubtitlesTrack(lang);
+
+          // Update mediaplayer CC menu
+          this.$(".mejs-captions-selector").find("input[type=checkbox]").prop("checked", false);
+          this.$(".mejs-captions-selector").find("input[value="+lang+"]").prop("checked",true);
+
+          this.resetSubtitlesMenu();
+
+          $link.find(".media-subtitles-option-icon").removeClass("icon-radio-unchecked");
+          $link.find(".media-subtitles-option-icon").addClass("icon-radio-checked");
+
+          if ($('html').is(".ie8") || $('html').is(".iPhone.version-7\\.0")) {
+            this.$(".media-subtitles-options").css("display", "none");
+          } else {
+            this.$('.media-subtitles-options').slideToggle(300);
+          }
+        },
+
+        setupSubtitles: function() {
+          this.captionsAreOn = true;
+
+          var lang = this.model.get('_startLanguage') === undefined ? 'en' : this.model.get('_startLanguage');
+
+          var $link = this.$(".media-subtitles-options").find("button[srclang="+lang+"]");
+
+          // Update item menu
+          $link.find(".media-subtitles-option-icon").removeClass("icon-radio-unchecked");
+          $link.find(".media-subtitles-option-icon").addClass("icon-radio-checked");
+
+          this.setupSubtitlesMenu();
+        },
+
+        setupSubtitlesMenu: function() {
+          var langs = this.model.get('_media').cc;
+          var numLangs = langs.length;
+
+          var langArray = new Array();
+          var srclangArray = new Array();
+
+          for (var i = 0; i < numLangs; i++) {
+            srclangArray[i] = langs[i].srclang;
+            langArray[i] = mejs.language.codes[srclangArray[i]];
+            this.$('.media-subtitles-option-title').eq(i+1).html(langArray[i]);
+          }
         }
 
     });
