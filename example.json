@@ -16,8 +16,6 @@
     "_useClosedCaptions":true,
     "_showCaptionsButton":true,
     "_startLanguage":"en",
-    "_allowFullScreen": true,
-    "_pauseWhenOffScreen": false,
     "_showVolumeControl":true,
     "_showReplayOverlay":true,
     "_startVolume":"80%",

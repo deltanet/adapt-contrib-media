@@ -19,22 +19,6 @@
       "inputType": "Text",
       "validators": [],
       "translatable": true
-    },
-    "ariaTranscriptLabel": {
-      "type": "string",
-      "required": false,
-      "default": "Transcript",
-      "inputType": "Text",
-      "validators": [],
-      "translatable": true
-    },
-    "ariaCaptionsLabel": {
-      "type": "string",
-      "required": false,
-      "default": "Subtitles",
-      "inputType": "Text",
-      "validators": [],
-      "translatable": true
     }
   },
   "properties": {
@@ -253,14 +237,6 @@
       "required": false,
       "default": false,
       "title": "Allow Full Screen",
-      "inputType": "Checkbox",
-      "validators": []
-    },
-    "_pauseWhenOffScreen": {
-      "type": "boolean",
-      "required": false,
-      "default": false,
-      "title": "Pause playback when video is no longer in view.",
       "inputType": "Checkbox",
       "validators": []
     },

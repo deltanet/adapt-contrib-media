@@ -45,8 +45,6 @@ The attributes listed below are used in *components.json* to configure **Media**
 
 **_allowFullScreen** (boolean): Determines whether fullscreen mode is available or not. Note that changing this setting has no effect in Internet Explorer 9 as this browser does not support fullscreen mode for HTML video.  
 
-**_pauseWhenOffScreen**  (boolean): If set to true, pause playback when video is no longer in view. The default is `false`.
-
 **_playsinline** (boolean): If set to `true`, videos will play 'inline' on iPhones (the same way they do on iPads). Note that this feature is only available in iOS10 and above. The default is `false`.    
 
 **_preventForwardScrubbing** (boolean): If enabled, will attempt to prevent users from skipping ahead in media (audio/video) unless '_isComplete' is marked as 'true'.  Users can skip backwards, and back up to the maxViewed time tracked by updateTime. Note: This does not apply to full screen iOS users and IE users may be able to circumvent this rule by using video play speed options in browser.  
@@ -183,17 +181,20 @@ Users of Internet Explorer v8  will need to have [Adobe Flash Player](https://ge
 Browser | Limitation |
 --------- | :----------- |
 Chrome   | No known issues.
-Firefox | No known issues.
+FireFox | No known issues.
 iOS/iPad | No known issues.
-Android | Firefox 33.1 with Vimeo: 'This video can't be played with your current setup'.
+Android | FireFox 33.1 with Vimeo: 'This video can't be played with your current setup'.
 Edge | No known issues.
 IE11 | No known issues.
+IE10 | No known issues.
+IE9 | Vimeo: ‘Sorry this video does not exist’.  
+IE8 | <ul><li>Due to the lack of support for HTML audio/video, users will need to have [Adobe Flash Player](https://get.adobe.com/flashplayer/) v10 (or better) or Microsoft [Silverlight](https://www.microsoft.com/getsilverlight/get-started/install/) installed to enable media playback.</li><li>YouTube: control bar missing</li><li>YouTube/Vimeo: doesn’t track play/ended events</li></ul>
 
 ----------------------------
-**Version number:**  2.1.16  
+**Version number:**  3.0.0  
 **Framework versions:** 4+  
 **Author / maintainer:** Deltanet, plus forked code from Adapt Core Team, [contributors](https://github.com/deltanet/adapt-media-autoplay/graphs/contributors)  
 **Accessibility support:** To be reviewed.  
 **RTL support:** yes  
-**Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), Edge, IE11, IE Mobile 11, Safari 11+12 for macOS+iOS    
+**Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), Edge, IE11, IE Mobile 11, Safari 11+12 for macOS+iOS     
 **Authoring tool support:** yes  

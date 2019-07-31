@@ -50,14 +50,15 @@ define([
         }
     });
 
-    var MediaAutoplay = ComponentView.extend({
+    var MediaAutoplayView = ComponentView.extend({
 
         events: {
             "click .media-inline-transcript-button": "initNotify",
             "click .media-external-transcript-button": "onExternalTranscriptClicked",
             "click .js-skip-to-transcript": "onSkipToTranscript",
             "click .media-subtitles-button": "onSubtitlesClicked",
-            "click .media-subtitles-option": "onSubtitlesOptionClicked"
+            "click .media-subtitles-option": "onSubtitlesOptionClicked",
+            "click .mejs-captions-selector": "onMediaElementCaptionsChange"
         },
 
         className: function() {
@@ -75,10 +76,7 @@ define([
             this.listenTo(Adapt, {
                 'device:resize': this.onScreenSizeChanged,
                 'device:changed': this.onDeviceChanged,
-                'popup:opened': this.notifyOpened,
-                'popup:closed': this.notifyClosed,
-                'media:stop': this.onMediaStop,
-                'pageView:ready': this.pageReady
+                'media:stop': this.onMediaStop
             });
 
             _.bindAll(this, 'onMediaElementPlay', 'onMediaElementPause', 'onMediaElementEnded', 'onMediaElementTimeUpdate', 'onMediaElementSeeking');
@@ -93,12 +91,11 @@ define([
             this.notifyIsOpen = false;
 
             if (this.model.get('_media').source) {
+                // Remove the protocol for streaming service.
+                // This prevents conflicts with HTTP/HTTPS
                 var media = this.model.get('_media');
 
-                // Avoid loading of Mixed Content (insecure content on a secure page)
-                if (window.location.protocol === 'https:' && media.source.indexOf('http:') === 0) {
-                    media.source = media.source.replace(/^http\:/, 'https:');
-                }
+                media.source = media.source.replace(/^https?\:/, "");
 
                 this.model.set('_media', media);
             }
@@ -114,8 +111,6 @@ define([
                 this.setupInstructions();
               }
             }
-
-            this.listenTo(Adapt, 'media:stop', this.onMediaStop);
         },
 
         notifyOpened: function() {
@@ -152,11 +147,6 @@ define([
           }
         },
 
-        pageReady: function () {
-          console.log('pageReady');
-          this.$('.component-widget').on("onscreen", _.bind(this.onscreen, this));
-        },
-
         setupPlayer: function() {
             if (!this.model.get('_playerOptions')) this.model.set('_playerOptions', {});
 
@@ -190,6 +180,7 @@ define([
                     Adapt.offlineStorage.set('captions', startLanguage);
                 }
                 modelOptions.startLanguage = this.checkForSupportedCCLanguage(Adapt.offlineStorage.get('captions'));
+
                 if (this.model.get('_showCaptionsButton')) {
                   this.setupSubtitles();
                 }
@@ -284,14 +275,21 @@ define([
 
             // handle other completion events in the event Listeners
             $(this.mediaElement).on({
-                'play': this.onMediaElementPlay,
-                'pause': this.onMediaElementPause,
-                'ended': this.onMediaElementEnded
+            	'play': this.onMediaElementPlay,
+            	'pause': this.onMediaElementPause,
+            	'ended': this.onMediaElementEnded
             });
 
             // occasionally the mejs code triggers a click of the captions language
             // selector during setup, this slight delay ensures we skip that
             _.delay(this.listenForCaptionsChange.bind(this), 250);
+
+            this.listenTo(Adapt, {
+                'popup:opened': this.notifyOpened,
+                'popup:closed': this.notifyClosed,
+                'pageView:ready': this.pageReady,
+                'audio:updateAudioStatus': this.setVideoVolume
+            });
         },
 
         /**
@@ -303,7 +301,7 @@ define([
             if(!this.model.get('_useClosedCaptions')) return;
 
             var selector = this.model.get('_playerOptions').toggleCaptionsButtonWhenOnlyOne ?
-                '.media-subtitles-button button' :
+                '.mejs-captions-button button' :
                 '.mejs-captions-selector';
 
             this.$(selector).on('click.mediaCaptionsChange', _.debounce(function() {
@@ -348,12 +346,14 @@ define([
             return this.model.get('_startLanguage') || 'none';
         },
 
+        pageReady: function () {
+            this.$('.component-widget').on("onscreen", _.bind(this.onscreen, this));
+        },
+
         onMediaElementPlay: function(event) {
             this.queueGlobalEvent('play');
 
             Adapt.trigger("media:stop", this);
-
-            if (this.model.get('_pauseWhenOffScreen')) $(this.mediaElement).on('inview', this.onMediaElementInview);
 
             this.model.set({
                 '_isMediaPlaying': true,
@@ -364,8 +364,8 @@ define([
                 this.setCompletionStatus();
             }
 
-            if(this.model.has('_videoInstruction')) {
-              if(this.model.get('_videoInstruction')._isEnabled) {
+            if (this.model.has('_videoInstruction')) {
+              if (this.model.get('_videoInstruction')._isEnabled) {
                 this.hideInstruction();
               }
             }
@@ -373,8 +373,6 @@ define([
 
         onMediaElementPause: function(event) {
             this.queueGlobalEvent('pause');
-
-            $(this.mediaElement).off('inview', this.onMediaElementInview);
 
             this.model.set('_isMediaPlaying', false);
         },
@@ -392,18 +390,15 @@ define([
                 this.setCompletionStatus();
             }
 
-            if(this.firstRun) {
-              if(this.model.has('_videoInstruction')) {
-                if(this.model.get('_videoInstruction')._isEnabled) {
+            if (this.firstRun) {
+              if (this.model.has('_videoInstruction')) {
+                if (this.model.get('_videoInstruction')._isEnabled) {
                   this.changeInstructionEnd();
                 }
               }
             }
-            this.firstRun = false;
-        },
 
-        onMediaElementInview: function(event, isInView) {
-            if (!isInView && !event.currentTarget.paused) event.currentTarget.pause();
+            this.firstRun = false;
         },
 
         onMediaElementSeeking: function(event) {
@@ -458,7 +453,6 @@ define([
             if (!this.mediaElement || !this.mediaElement.player) return;
 
             this.mediaElement.player.pause();
-
         },
 
         onOverlayClick: function() {
@@ -485,13 +479,11 @@ define([
         },
 
         onscreen: function(event, measurements) {
-          console.log('onscreen');
             var isOnscreenY = (measurements.percentFromTop < 50) && (measurements.percentFromTop > -10);
             var isOnscreenX = measurements.percentInviewHorizontal == 100;
 
             if (isOnscreenY && isOnscreenX) {
                 if (this.model.get('_autoPlay') && this.notifyIsOpen == false && this.mediaCanAutoplay == true) {
-                  console.log('play media');
                     this.playMediaElement(true);
                 }
                 if (this.model.get('_setCompletionOn') == 'inview') {
@@ -508,9 +500,10 @@ define([
             if (!this.mediaElement) return;
 
             if (this.model.get('_isVisible') && state) {
+                Adapt.trigger('audio:stopAllChannels');
                 this.mediaElement.play();
-                // Set to false to stop autoplay when inview again
-                if(this.mediaAutoplayOnce) {
+                // Set to false to stop autoplay when onscreen again
+                if (this.mediaAutoplayOnce) {
                     this.mediaCanAutoplay = false;
                 }
             } else if (state === false) {
@@ -524,10 +517,12 @@ define([
 
             if(this.model.get('_useClosedCaptions')) {
                 var selector = this.model.get('_playerOptions').toggleCaptionsButtonWhenOnlyOne ?
-                '.media-subtitles-button button' :
+                '.mejs-captions-button button' :
                 '.mejs-captions-selector';
                 this.$(selector).off('click.mediaCaptionsChange');
             }
+
+            this.$('.component-widget').off('onscreen');
 
             var modelOptions = this.model.get('_playerOptions');
             delete modelOptions.success;
@@ -550,15 +545,14 @@ define([
                     delete mejs.players[player_id];
                 }
             }
+
             if (this.mediaElement) {
-                this.mediaElement.removeEventListener('playing', this.onPlayMedia);
                 $(this.mediaElement).off({
                     'play': this.onMediaElementPlay,
                     'pause': this.onMediaElementPause,
                     'ended': this.onMediaElementEnded,
                     'seeking': this.onMediaElementSeeking,
-                    'timeupdate': this.onMediaElementTimeUpdate,
-                    'inview': this.onMediaElementInview
+                    'timeupdate': this.onMediaElementTimeUpdate
                 });
 
                 this.mediaElement.src = "";
@@ -567,10 +561,6 @@ define([
             }
 
             ComponentView.prototype.remove.call(this);
-        },
-
-        onPlayMedia: function() {
-          Adapt.trigger('audio:stopAllChannels');
         },
 
         onDeviceChanged: function() {
@@ -626,8 +616,8 @@ define([
 
         checkCompletion: function () {
           // Add check for element for backwards compatability
-          if(this.model.has('_videoInstruction')) {
-            if(this.model.get('_videoInstruction')._isEnabled && this.model.get("_isComplete")) {
+          if (this.model.has('_videoInstruction')) {
+            if (this.model.get('_videoInstruction')._isEnabled && this.model.get("_isComplete")) {
               this.changeInstructionEnd();
             }
           }
@@ -635,7 +625,7 @@ define([
 
         changeInstructionStart: function () {
           // Check for empty elements
-          if(this.instructionStart == "") {
+          if (this.instructionStart == "") {
             this.hideInstruction();
           } else {
             this.$('.video-instruction').find('.component-instruction-inner').html(this.instructionStart);
@@ -645,7 +635,7 @@ define([
 
         changeInstructionEnd: function () {
           // Check for empty elements
-          if(this.instructionEnd == "") {
+          if (this.instructionEnd == "") {
             this.hideInstruction();
           } else {
             this.$('.video-instruction').find('.component-instruction-inner').html(this.instructionEnd);
@@ -669,11 +659,7 @@ define([
           this.$('.media-instruction-container').css({ top: (position - 20)+'%'});
           this.$('.video-instruction').show();
 
-          if (Adapt.config.get('_disableAnimation')) {
-            this.$('.media-instruction-container').css({ top: position+'%'});
-          } else {
-            this.$('.media-instruction-container').animate({ top: position+'%'}, 500);
-          }
+          this.$('.media-instruction-container').animate({ top: position+'%'}, 500);
         },
 
         addThirdPartyAfterFixes: function() {
@@ -697,8 +683,35 @@ define([
             // need slight delay before focussing button to make it work when JAWS is running
             // see https://github.com/adaptlearning/adapt_framework/issues/2427
             _.delay(function() {
-                this.$('.media-transcript-container button').a11y_focus();
+                this.$('.media-transcript-button-container button').a11y_focus();
             }.bind(this), 250);
+        },
+
+        onToggleInlineTranscript: function(event) {
+            if (event) event.preventDefault();
+            var $transcriptBodyContainer = this.$(".media-inline-transcript-body-container");
+            var $button = this.$(".media-inline-transcript-button");
+            var $buttonText = this.$(".media-inline-transcript-button .transcript-text-container");
+
+            if ($transcriptBodyContainer.hasClass("inline-transcript-open")) {
+                $transcriptBodyContainer.stop(true,true).slideUp(function() {
+                    $(window).resize();
+                });
+                $button.attr('aria-expanded', false);
+                $transcriptBodyContainer.removeClass("inline-transcript-open");
+                $buttonText.html(this.model.get("_transcript").inlineTranscriptButton);
+            } else {
+                $transcriptBodyContainer.stop(true,true).slideDown(function() {
+                    $(window).resize();
+                });
+                $button.attr('aria-expanded', true);
+                $transcriptBodyContainer.addClass("inline-transcript-open");
+                $buttonText.html(this.model.get("_transcript").inlineTranscriptCloseButton);
+
+                if (this.model.get('_transcript')._setCompletionOnView !== false) {
+                    this.setCompletionStatus();
+                }
+            }
         },
 
         onExternalTranscriptClicked: function(event) {
@@ -737,29 +750,6 @@ define([
             }
         },
 
-        setVideoVolume: function() {
-          if (!this.mediaElement) return;
-          // Check for audio extension
-          if (Adapt.course.get("_audio") && Adapt.course.get("_audio")._isEnabled) {
-            // If audio is turned on
-            if(Adapt.audio.audioStatus == 1){
-              if(this.model.has('_startVolume')) {
-                this.mediaElement.player.setVolume(parseInt(this.model.get('_startVolume'))/100);
-              } else {
-                this.mediaElement.player.setVolume(this.mediaElement.player.options.startVolume);
-              }
-            } else {
-              this.mediaElement.player.setVolume(0);
-            }
-          } else {
-            if(this.model.has('_startVolume')) {
-              this.mediaElement.player.setVolume(parseInt(this.model.get('_startVolume'))/100);
-            } else {
-              this.mediaElement.player.setVolume(this.mediaElement.player.options.startVolume);
-            }
-          }
-        },
-
         triggerGlobalEvent: function(eventType) {
             Adapt.trigger('media', {
                 isVideo: this.mediaElement.player.isVideo,
@@ -769,8 +759,72 @@ define([
             });
         },
 
+        setVideoVolume: function() {
+          if (!this.mediaElement) return;
+          // Check for audio extension
+          if (!Adapt.audio) return;
+          if (Adapt.course.get("_audio") && Adapt.course.get("_audio")._isEnabled) {
+            // If audio is turned on
+            if (Adapt.audio.audioStatus == 1){
+              if (this.model.has('_startVolume')) {
+                this.mediaElement.player.setVolume(parseInt(this.model.get('_startVolume'))/100);
+              } else {
+                this.mediaElement.player.setVolume(this.mediaElement.player.options.startVolume);
+              }
+            } else {
+              this.mediaElement.player.setVolume(0);
+            }
+          } else {
+            if (this.model.has('_startVolume')) {
+              this.mediaElement.player.setVolume(parseInt(this.model.get('_startVolume'))/100);
+            } else {
+              this.mediaElement.player.setVolume(this.mediaElement.player.options.startVolume);
+            }
+          }
+        },
+
+        initNotify: function() {
+          if (this.isPopupOpen) return;
+
+          this.isPopupOpen = true;
+
+          if (this.model.get('_transcript')._setCompletionOnView !== false) {
+            this.setCompletionStatus();
+          }
+
+          Adapt.trigger("notify:popup", {
+              title: this.model.get('_transcript').inlineTranscriptTitle,
+              body: this.model.get('_transcript').inlineTranscriptBody,
+              _isCancellable: true,
+              _showCloseButton: true,
+              _closeOnBackdrop: true,
+              _classes: ' media-autoplay'
+          });
+
+          this.listenToOnce(Adapt, {
+              'popup:closed': this.onPopupClosed
+          });
+        },
+
+        onPopupClosed: function() {
+            this.isPopupOpen = false;
+        },
+
+        setupSubtitlesMenu: function() {
+          var langs = this.model.get('_media').cc;
+          var numLangs = langs.length;
+
+          var langArray = [];
+          var srclangArray = [];
+
+          for (var i = 0; i < numLangs; i++) {
+            srclangArray[i] = langs[i].srclang;
+            langArray[i] = mejs.language.codes[srclangArray[i]];
+            this.$('.media-subtitles-option-title').eq(i+1).html(langArray[i]);
+          }
+        },
+
         onSubtitlesClicked: function() {
-          console.log('onSubtitlesClicked clicked... ' + this.captionsAreOn);
           var langs = this.model.get('_media').cc;
           var numLangs = langs.length;
           // Check if only one language is in the list
@@ -786,31 +840,16 @@ define([
             }
             this.updateSubtitlesTrack(lang);
           } else {
+            this.toggleSubtitlesMenu();
+          }
+        },
+
+        toggleSubtitlesMenu: function() {
+          if ($('html').is(".ie8") || $('html').is(".iPhone.version-7\\.0")) {
+            this.$(".media-subtitles-options").css("display", "block");
+          } else {
             this.$('.media-subtitles-options').slideToggle(300);
           }
-        },
-
-        updateSubtitlesTrack: function(lang) {
-          this.mediaElement.player.setTrack(lang);
-        },
-
-        initNotify: function() {
-          if(this.isPopupOpen) return;
-
-          Adapt.trigger("notify:popup", {
-            title: this.model.get('_transcript').inlineTranscriptTitle,
-            body: this.model.get('_transcript').inlineTranscriptBody
-          });
-
-          this.isPopupOpen = true;
-
-          if (this.model.get('_transcript')._setCompletionOnView !== false) {
-            this.setCompletionStatus();
-          }
-
-          Adapt.once("notify:closed", _.bind(function() {
-            this.isPopupOpen = false;
-          }, this));
         },
 
         onSubtitlesOptionClicked: function(event) {
@@ -837,6 +876,10 @@ define([
           }
         },
 
+        updateSubtitlesTrack: function(lang) {
+          this.mediaElement.player.setTrack(lang);
+        },
+
         setupSubtitles: function() {
           this.captionsAreOn = true;
 
@@ -851,25 +894,40 @@ define([
           this.setupSubtitlesMenu();
         },
 
-        setupSubtitlesMenu: function() {
-          var langs = this.model.get('_media').cc;
-          var numLangs = langs.length;
+        updateSubtitlesOption: function(lang) {
+          var $link = this.$(".media-subtitles-options").find("button[srclang="+lang+"]");
 
-          var langArray = new Array();
-          var srclangArray = new Array();
+          this.resetSubtitlesMenu();
 
-          for (var i = 0; i < numLangs; i++) {
-            srclangArray[i] = langs[i].srclang;
-            langArray[i] = mejs.language.codes[srclangArray[i]];
-            this.$('.media-subtitles-option-title').eq(i+1).html(langArray[i]);
-          }
+          $link.find(".media-subtitles-option-icon").removeClass("icon-radio-unchecked");
+          $link.find(".media-subtitles-option-icon").addClass("icon-radio-checked");
+        },
+
+        resetSubtitlesMenu:function () {
+          this.$(".media-subtitles-option-icon").removeClass("icon-radio-checked");
+          this.$(".media-subtitles-option-icon").removeClass("icon-radio-unchecked");
+          this.$(".media-subtitles-option-icon").addClass("icon-radio-unchecked");
+        },
+
+        onMediaElementCaptionsChange: function() {
+          if (!this.mediaElement) return;
+          var player = this.mediaElement.player;
+          // Delay so the var has time to update
+          _.delay(_.bind(function() {
+            if (player.selectedTrack === null) {
+  						lang = 'none';
+  					} else {
+  						lang = player.selectedTrack.srclang;
+  					}
+            this.updateSubtitlesOption(lang);
+          }, this), 400);
         }
 
     });
 
     return Adapt.register('media-autoplay', {
         model: ComponentModel.extend({}),// create a new class in the inheritance chain so it can be extended per component type if necessary later
-        view: MediaAutoplay
+        view: MediaAutoplayView
     });
 
 });
