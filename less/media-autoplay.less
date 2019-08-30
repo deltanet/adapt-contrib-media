@@ -26,10 +26,18 @@
 
     .mejs-container {
         background-color: transparent;
+        // The width set by mejs is always 100% of container, set in pixels.
+        // Having a fixed pixel size prevents iOS from changing orientation without scaling.
+        width: 100% !important;
         .mejs-controls .mejs-time {
             padding-right:1px;
             padding-left:1px;
         }
+    }
+
+    .audio-poster {
+        display: block;
+        margin: 0 auto;
     }
 
     .external-source {
@@ -165,17 +173,34 @@
         }
     }
 
+    // Bug Fix for touch devices to override standard hover event in mep.less L119
+    // ==============================
+    .mejs-overlay {
+        &:hover {
+            .mejs-overlay-button {
+                background-position: 0 0;
+            }
+        }
+
+        .no-touch &:hover {
+            .mejs-overlay-button {
+                background-position: 0 -100px;
+            }
+        }
+    }
+    // ==============================
+
     .mejs-overlay-button {
-        background-image: url(../../assets/bigplay.svg);
+        background-image: url(assets/bigplay.svg);
         &.replay{
-          background-image: url(../../assets/replay.png);
+          background-image: url(assets/replay.png);
         }
     }
 
     .no-svg .mejs-overlay-button {
-        background-image: url(../../assets/bigplay.png);
+        background-image: url(assets/bigplay.png);
         &.replay {
-            background-image: url(../../assets/replay.png);
+            background-image: url(assets/replay.png);
         }
     }
 
@@ -188,35 +213,27 @@
     .mejs-postroll-layer,
     .mejs-postroll-close,
     .mejs-controls .mejs-speed-button .mejs-speed-selector {
-        background-image: url(../../assets/background.png);
+        background-image: url(assets/background.png);
     }
 
     .mejs-overlay-loading span {
-        background-image: url(../../assets/loading.gif);
+        background-image: url(assets/loading.gif);
     }
 
     .mejs-controls .mejs-button {
         &.mejs-jump-forward-button {
-            background-image: url(../../assets/jumpforward.png);
+            background-image: url(assets/jumpforward.png);
         }
         &.mejs-skip-back-button {
-            background-image: url(../../assets/skipback.png);
+            background-image: url(assets/skipback.png);
         }
         button {
-            background-image: url(../../assets/controls.svg);
-        }
-    }
-
-    .accessibility.no-touch & {
-        .mejs-controls .mejs-button {
-            button:focus {
-                outline: @focus-outline;
-            }
+            background-image: url(assets/controls.svg);
         }
     }
 
     .no-svg .mejs-controls .mejs-button button {
-        background-image: url(../../assets/controls.png);
+        background-image: url(assets/controls.png);
     }
 
     .mejs-container-fullscreen .mejs-mediaelement, .mejs-container-fullscreen video {
@@ -224,6 +241,21 @@
         height: 100% !important;
         background-color: black;
     }
+
+    // Bug fix for missing control icons on iOS touch devices
+    // ==============================
+    .mejs-offscreen {
+        -webkit-clip-path: polygon(0px 0px, 0px 0px,0px 0px, 0px 0px); // required for Safari/Chrome iOS 11. Ref: https://caniuse.com/#feat=css-clip-path
+    }
+    // ==============================
+
+    // Bug fix for CC button language selector still appearing when toggleCaptionsButtonWhenOnlyOne: true
+    // see https://github.com/adaptlearning/adapt_framework/issues/1883
+    // ==============================
+    &.toggle-captions .mejs-captions-selector {
+        display: none !important;
+    }
+    // ==============================
 
     .mejs-captions-selector {
       right: auto !important;
@@ -247,6 +279,7 @@
 	font-weight: normal;
 	font-style: normal;
 }
+
 .icon-cc:before {
 	font-family: 'closedcaptions';
 	content: '\e901';

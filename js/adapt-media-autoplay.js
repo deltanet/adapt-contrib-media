@@ -1,10 +1,10 @@
 define([
     'core/js/adapt',
     'core/js/views/componentView',
+    'core/js/models/componentModel',
     'libraries/mediaelement-and-player',
-    'libraries/mediaelement-and-player-accessible-captions',
     'libraries/mediaelement-fullscreen-hook'
-], function(Adapt, ComponentView) {
+], function(Adapt, ComponentView, ComponentModel) {
 
     var froogaloopAdded = false;
 
@@ -29,14 +29,45 @@ define([
         }
     }
 
-    var MediaAutoplay = ComponentView.extend({
+    /*
+     * Default shortcut keys trap a screen reader user inside the player once in focus. These keys are unnecessary
+     * as one may traverse the player in a linear fashion without needing to know or use shortcut keys. Below is
+     * the removal of the default shortcut keys.
+     *
+     * The default seek interval functions are passed two different data types from mejs which they handle incorrectly. One
+     * is a duration integer the other is the player object. The default functions error on slider key press and so break
+     * accessibility. Below is a correction.
+     */
+    _.extend(mejs.MepDefaults, {
+        keyActions: [],
+        defaultSeekForwardInterval: function(duration) {
+            if (typeof duration === "object") return duration.duration*0.05;
+            return duration*0.05;
+        },
+        defaultSeekBackwardInterval: function(duration) {
+            if (typeof duration === "object") return duration.duration*0.05;
+            return duration*0.05;
+        }
+    });
+
+    var MediaAutoplayView = ComponentView.extend({
 
         events: {
             "click .media-inline-transcript-button": "initNotify",
             "click .media-external-transcript-button": "onExternalTranscriptClicked",
+            "click .js-skip-to-transcript": "onSkipToTranscript",
             "click .media-subtitles-button": "onSubtitlesClicked",
             "click .media-subtitles-option": "onSubtitlesOptionClicked",
             "click .mejs-captions-selector": "onMediaElementCaptionsChange"
+        },
+
+        className: function() {
+            var classes = ComponentView.prototype.className.call(this);
+            var playerOptions = this.model.get('_playerOptions');
+            if (playerOptions && playerOptions.toggleCaptionsButtonWhenOnlyOne) {
+                classes += " toggle-captions";
+            }
+            return classes;
         },
 
         preRender: function() {
@@ -45,7 +76,7 @@ define([
             this.listenTo(Adapt, {
                 'device:resize': this.onScreenSizeChanged,
                 'device:changed': this.onDeviceChanged,
-                'accessibility:toggle': this.onAccessibilityToggle
+                'media:stop': this.onMediaStop
             });
 
             _.bindAll(this, 'onMediaElementPlay', 'onMediaElementPause', 'onMediaElementEnded', 'onMediaElementTimeUpdate', 'onMediaElementSeeking');
@@ -80,8 +111,6 @@ define([
                 this.setupInstructions();
               }
             }
-
-            this.listenTo(Adapt, 'media:stop', this.onMediaStop);
         },
 
         notifyOpened: function() {
@@ -129,7 +158,7 @@ define([
                 if (this.model.get('_useClosedCaptions')) {
                     modelOptions.features.unshift('tracks');
                 }
-                if (this.model.get("_allowFullScreen") && !$("html").is(".ie9")) {
+                if (this.model.get("_allowFullScreen")) {
                     modelOptions.features.push('fullscreen');
                 }
                 if (this.model.get('_showVolumeControl')) {
@@ -137,22 +166,24 @@ define([
                 }
             }
 
-            modelOptions.success = _.bind(this.onPlayerReady, this);
+            /*
+            Unless we are on Android/iOS and using native controls, when MediaElementJS initializes the player
+            it will invoke the success callback prior to performing one last call to setPlayerSize.
+            This call to setPlayerSize is deferred by 50ms so we add a delay of 100ms here to ensure that
+            we don't invoke setReadyStatus until the player is definitely finished rendering.
+            */
+            modelOptions.success = _.debounce(this.onPlayerReady.bind(this), 100);
 
             if (this.model.get('_useClosedCaptions')) {
-                modelOptions.startLanguage = this.model.get('_startLanguage') === undefined ? 'en' : this.model.get('_startLanguage');
+                var startLanguage = this.model.get('_startLanguage') || 'en';
+                if (!Adapt.offlineStorage.get('captions')) {
+                    Adapt.offlineStorage.set('captions', startLanguage);
+                }
+                modelOptions.startLanguage = this.checkForSupportedCCLanguage(Adapt.offlineStorage.get('captions'));
+
                 if (this.model.get('_showCaptionsButton')) {
                   this.setupSubtitles();
                 }
-            }
-
-            var hasAccessibility = Adapt.config.has('_accessibility') && Adapt.config.get('_accessibility')._isActive
-                ? true
-                : false;
-
-            if (hasAccessibility) {
-                modelOptions.alwaysShowControls = true;
-                modelOptions.hideVideoControlsOnLoad = false;
             }
 
             if (modelOptions.alwaysShowControls === undefined) {
@@ -164,21 +195,23 @@ define([
 
             this.addMediaTypeClass();
 
-            this.addThirdPartyFixes(modelOptions, _.bind(function createPlayer() {
+            this.addThirdPartyFixes(modelOptions, function createPlayer() {
                 // create the player
                 this.$('audio, video').mediaelementplayer(modelOptions);
+                this.cleanUpPlayer();
 
-                // We're streaming - set ready now, as success won't be called above
-                try {
-                    if (this.model.get('_media').source) {
-                        this.$('.media-widget').addClass('external-source');
-                    }
-                } catch (e) {
-                    console.log("ERROR! No _media property found in components.json for component " + this.model.get('_id'));
-                } finally {
+                var _media = this.model.get('_media');
+                // if no media is selected - set ready now, as success won't be called
+                if (!_media.mp3 && !_media.mp4 && !_media.ogv && !_media.webm && !_media.source) {
+                    Adapt.log.warn("ERROR! No media is selected in components.json for component " + this.model.get('_id'));
                     this.setReadyStatus();
+                    return;
                 }
-            }, this));
+                // Check if we're streaming
+                if (_media.source) {
+                    this.$('.media-widget').addClass('external-source');
+                }
+            }.bind(this));
 
             this.mediaAutoplayOnce = this.model.get('_autoPlayOnce');
             this.mediaCanAutoplay = this.model.get('_autoPlay');
@@ -204,24 +237,32 @@ define([
                     modelOptions.hideVideoControlsOnLoad = true;
                     modelOptions.features = [];
                     if (froogaloopAdded) return callback();
-                    Modernizr.load({
-                        load: "assets/froogaloop.js",
-                        complete: function() {
+                    $.getScript("assets/froogaloop.js")
+                        .done(function() {
                             froogaloopAdded = true;
                             callback();
-                        }
-                    });
+                        })
+                        .fail(function() {
+                            froogaloopAdded = false;
+                            console.log('Could not load froogaloop.js');
+                        });
                     break;
                 default:
                     callback();
             }
         },
 
+        cleanUpPlayer: function() {
+            this.$('.media-widget').children('.mejs-offscreen').remove();
+            this.$('[role=application]').removeAttr('role tabindex');
+            this.$('[aria-controls]').removeAttr('aria-controls');
+        },
+
         setupEventListeners: function() {
-            this.completionEvent = (!this.model.get('_setCompletionOn')) ? 'play' : this.model.get('_setCompletionOn');
+            this.completionEvent = (this.model.get('_setCompletionOn') || 'play');
 
             if (this.completionEvent === 'inview') {
-                this.$('.component-widget').on('onscreen', _.bind(this.onscreen, this));
+                this.setupInviewCompletion('.component-widget');
             }
 
             // wrapper to check if preventForwardScrubbing is turned on.
@@ -239,8 +280,9 @@ define([
             	'ended': this.onMediaElementEnded
             });
 
-            // Add listener for when the media is playing so the audio can be stopped
-            this.mediaElement.addEventListener('playing', _.bind(this.onPlayMedia, this));
+            // occasionally the mejs code triggers a click of the captions language
+            // selector during setup, this slight delay ensures we skip that
+            _.delay(this.listenForCaptionsChange.bind(this), 250);
 
             this.listenTo(Adapt, {
                 'popup:opened': this.notifyOpened,
@@ -250,11 +292,66 @@ define([
             });
         },
 
+        /**
+         * Sets up the component to detect when the user has changed the captions so that it can store the user's
+         * choice in offlineStorage and notify other media components on the same page of the change
+         * Also sets the component up to listen for this event from other media components on the same page
+         */
+        listenForCaptionsChange: function() {
+            if(!this.model.get('_useClosedCaptions')) return;
+
+            var selector = this.model.get('_playerOptions').toggleCaptionsButtonWhenOnlyOne ?
+                '.mejs-captions-button button' :
+                '.mejs-captions-selector';
+
+            this.$(selector).on('click.mediaCaptionsChange', _.debounce(function() {
+                var srclang = this.mediaElement.player.selectedTrack ? this.mediaElement.player.selectedTrack.srclang : 'none';
+                Adapt.offlineStorage.set('captions', srclang);
+                Adapt.trigger('media:captionsChange', this, srclang);
+            }.bind(this), 250)); // needs debouncing because the click event fires twice
+
+            this.listenTo(Adapt, 'media:captionsChange', this.onCaptionsChanged);
+        },
+
+        /**
+         * Handles updating the captions in this instance when learner changes captions in another
+         * media component on the same page
+         * @param {Backbone.View} view The view instance that triggered the event
+         * @param {string} lang The captions language the learner chose in the other media component
+         */
+        onCaptionsChanged: function(view, lang) {
+            if (view && view.cid === this.cid) return; //ignore the event if we triggered it
+
+            lang = this.checkForSupportedCCLanguage(lang);
+
+            this.mediaElement.player.setTrack(lang);
+
+            // because calling player.setTrack doesn't update the cc button's languages popup...
+            var $inputs = this.$('.mejs-captions-selector input');
+            $inputs.filter(':checked').prop('checked', false);
+            $inputs.filter('[value="' + lang + '"]').prop('checked', true);
+        },
+
+        /**
+         * When the learner selects a captions language in another media component, that language may not be available
+         * in this instance, in which case default to the `_startLanguage` if that's set - or "none" if it's not
+         * @param {string} lang The language we're being asked to switch to e.g. "de"
+         * @return {string} The language we're actually going to switch to - or "none" if there's no good match
+         */
+        checkForSupportedCCLanguage: function (lang) {
+            if (!lang || lang === 'none') return 'none';
+
+            if(_.findWhere(this.model.get('_media').cc, {srclang: lang})) return lang;
+
+            return this.model.get('_startLanguage') || 'none';
+        },
+
         pageReady: function () {
-          this.$('.component-widget').on("onscreen", _.bind(this.onscreen, this));
+            this.$('.component-widget').on("onscreen", _.bind(this.onscreen, this));
         },
 
         onMediaElementPlay: function(event) {
+            this.queueGlobalEvent('play');
 
             Adapt.trigger("media:stop", this);
 
@@ -267,18 +364,22 @@ define([
                 this.setCompletionStatus();
             }
 
-            if(this.model.has('_videoInstruction')) {
-              if(this.model.get('_videoInstruction')._isEnabled) {
+            if (this.model.has('_videoInstruction')) {
+              if (this.model.get('_videoInstruction')._isEnabled) {
                 this.hideInstruction();
               }
             }
         },
 
         onMediaElementPause: function(event) {
+            this.queueGlobalEvent('pause');
+
             this.model.set('_isMediaPlaying', false);
         },
 
         onMediaElementEnded: function(event) {
+            this.queueGlobalEvent('ended');
+
             this.model.set('_isMediaEnded', true);
 
             if (this.model.has("_showReplayOverlay") && this.model.get("_showReplayOverlay")) {
@@ -289,13 +390,14 @@ define([
                 this.setCompletionStatus();
             }
 
-            if(this.firstRun) {
-              if(this.model.has('_videoInstruction')) {
-                if(this.model.get('_videoInstruction')._isEnabled) {
+            if (this.firstRun) {
+              if (this.model.has('_videoInstruction')) {
+                if (this.model.get('_videoInstruction')._isEnabled) {
                   this.changeInstructionEnd();
                 }
               }
             }
+
             this.firstRun = false;
         },
 
@@ -332,8 +434,8 @@ define([
             // stop the player dealing with this, we'll do it ourselves
             player.options.clickToPlayPause = false;
 
-            this.onOverlayClick = _.bind(this.onOverlayClick, this);
-            this.onMediaElementClick = _.bind(this.onMediaElementClick, this);
+            this.onOverlayClick = this.onOverlayClick.bind(this);
+            this.onMediaElementClick = this.onMediaElementClick.bind(this);
 
             // play on 'big button' click
             this.$('.mejs-overlay-button').on("click", this.onOverlayClick);
@@ -348,10 +450,9 @@ define([
             // Make sure this view isn't triggering media:stop
             if (view && view.cid === this.cid) return;
 
-            var player = this.mediaElement.player;
-            if (!player) return;
+            if (!this.mediaElement || !this.mediaElement.player) return;
 
-            player.pause();
+            this.mediaElement.player.pause();
         },
 
         onOverlayClick: function() {
@@ -372,7 +473,6 @@ define([
         checkIfResetOnRevisit: function() {
             var isResetOnRevisit = this.model.get('_isResetOnRevisit');
 
-            // If reset is enabled set defaults
             if (isResetOnRevisit) {
                 this.model.reset(isResetOnRevisit);
             }
@@ -400,9 +500,10 @@ define([
             if (!this.mediaElement) return;
 
             if (this.model.get('_isVisible') && state) {
+                Adapt.trigger('audio:stopAllChannels');
                 this.mediaElement.play();
-                // Set to false to stop autoplay when inview again
-                if(this.mediaAutoplayOnce) {
+                // Set to false to stop autoplay when onscreen again
+                if (this.mediaAutoplayOnce) {
                     this.mediaCanAutoplay = false;
                 }
             } else if (state === false) {
@@ -413,6 +514,13 @@ define([
         remove: function() {
             this.$('.mejs-overlay-button').off("click", this.onOverlayClick);
             this.$('.mejs-mediaelement').off("click", this.onMediaElementClick);
+
+            if(this.model.get('_useClosedCaptions')) {
+                var selector = this.model.get('_playerOptions').toggleCaptionsButtonWhenOnlyOne ?
+                '.mejs-captions-button button' :
+                '.mejs-captions-selector';
+                this.$(selector).off('click.mediaCaptionsChange');
+            }
 
             this.$('.component-widget').off('onscreen');
 
@@ -427,12 +535,6 @@ define([
                 }
             }
 
-            if ($("html").is(".ie8")) {
-                var obj = this.$("object")[0];
-                if (obj) {
-                    obj.style.display = "none";
-                }
-            }
             if (this.mediaElement && this.mediaElement.player) {
                 var player_id = this.mediaElement.player.id;
 
@@ -443,8 +545,8 @@ define([
                     delete mejs.players[player_id];
                 }
             }
+
             if (this.mediaElement) {
-                this.mediaElement.removeEventListener('playing', this.onPlayMedia);
                 $(this.mediaElement).off({
                     'play': this.onMediaElementPlay,
                     'pause': this.onMediaElementPause,
@@ -459,10 +561,6 @@ define([
             }
 
             ComponentView.prototype.remove.call(this);
-        },
-
-        onPlayMedia: function() {
-          Adapt.trigger('audio:stopAllChannels');
         },
 
         onDeviceChanged: function() {
@@ -485,6 +583,7 @@ define([
             }
 
             this.addThirdPartyAfterFixes();
+            this.cleanUpPlayerAfter();
 
             if(this.model.has('_startVolume')) {
                 // Setting the start volume only works with the Flash-based player if you do it here rather than in setupPlayer
@@ -517,8 +616,8 @@ define([
 
         checkCompletion: function () {
           // Add check for element for backwards compatability
-          if(this.model.has('_videoInstruction')) {
-            if(this.model.get('_videoInstruction')._isEnabled && this.model.get("_isComplete")) {
+          if (this.model.has('_videoInstruction')) {
+            if (this.model.get('_videoInstruction')._isEnabled && this.model.get("_isComplete")) {
               this.changeInstructionEnd();
             }
           }
@@ -526,7 +625,7 @@ define([
 
         changeInstructionStart: function () {
           // Check for empty elements
-          if(this.instructionStart == "") {
+          if (this.instructionStart == "") {
             this.hideInstruction();
           } else {
             this.$('.video-instruction').find('.component-instruction-inner').html(this.instructionStart);
@@ -536,7 +635,7 @@ define([
 
         changeInstructionEnd: function () {
           // Check for empty elements
-          if(this.instructionEnd == "") {
+          if (this.instructionEnd == "") {
             this.hideInstruction();
           } else {
             this.$('.video-instruction').find('.component-instruction-inner').html(this.instructionEnd);
@@ -560,11 +659,7 @@ define([
           this.$('.media-instruction-container').css({ top: (position - 20)+'%'});
           this.$('.video-instruction').show();
 
-          if (Adapt.config.get('_disableAnimation')) {
-            this.$('.media-instruction-container').css({ top: position+'%'});
-          } else {
-            this.$('.media-instruction-container').animate({ top: position+'%'}, 500);
-          }
+          this.$('.media-instruction-container').animate({ top: position+'%'}, 500);
         },
 
         addThirdPartyAfterFixes: function() {
@@ -575,39 +670,48 @@ define([
             }
         },
 
+        cleanUpPlayerAfter: function() {
+            this.$("[aria-valuemax='NaN']").attr("aria-valuemax", 0);
+        },
+
         onScreenSizeChanged: function() {
             this.$('audio, video').width(this.$('.component-widget').width());
             this.positionInstruction();
         },
 
-        onAccessibilityToggle: function() {
-           this.showControls();
+        onSkipToTranscript: function() {
+            // need slight delay before focussing button to make it work when JAWS is running
+            // see https://github.com/adaptlearning/adapt_framework/issues/2427
+            _.delay(function() {
+                this.$('.media-transcript-button-container button').a11y_focus();
+            }.bind(this), 250);
         },
 
         onToggleInlineTranscript: function(event) {
             if (event) event.preventDefault();
             var $transcriptBodyContainer = this.$(".media-inline-transcript-body-container");
             var $button = this.$(".media-inline-transcript-button");
+            var $buttonText = this.$(".media-inline-transcript-button .transcript-text-container");
 
             if ($transcriptBodyContainer.hasClass("inline-transcript-open")) {
-                $transcriptBodyContainer.slideUp(function() {
+                $transcriptBodyContainer.stop(true,true).slideUp(function() {
                     $(window).resize();
                 });
+                $button.attr('aria-expanded', false);
                 $transcriptBodyContainer.removeClass("inline-transcript-open");
-                $button.html(this.model.get("_transcript").inlineTranscriptButton);
+                $buttonText.html(this.model.get("_transcript").inlineTranscriptButton);
             } else {
-                $transcriptBodyContainer.slideDown(function() {
+                $transcriptBodyContainer.stop(true,true).slideDown(function() {
                     $(window).resize();
-                }).a11y_focus();
+                });
+                $button.attr('aria-expanded', true);
                 $transcriptBodyContainer.addClass("inline-transcript-open");
-                $button.html(this.model.get("_transcript").inlineTranscriptCloseButton);
+                $buttonText.html(this.model.get("_transcript").inlineTranscriptCloseButton);
+
                 if (this.model.get('_transcript')._setCompletionOnView !== false) {
                     this.setCompletionStatus();
                 }
             }
-            _.delay(_.bind(function() {
-                Adapt.trigger('device:resize');
-            }, this), 300);
         },
 
         onExternalTranscriptClicked: function(event) {
@@ -616,40 +720,53 @@ define([
             }
         },
 
-        showControls: function() {
-            var hasAccessibility = Adapt.config.has('_accessibility') && Adapt.config.get('_accessibility')._isActive
-                ? true
-                : false;
+        /**
+         * Queue firing a media event to prevent simultaneous events firing, and provide a better indication of how the
+         * media  player is behaving
+         * @param {string} eventType
+         */
+        queueGlobalEvent: function(eventType) {
+            var t = Date.now();
+            var lastEvent = this.lastEvent || { time: 0 };
+            var timeSinceLastEvent = t - lastEvent.time;
+            var debounceTime = 500;
 
-            if (hasAccessibility) {
-                if (!this.mediaElement.player) return;
+            this.lastEvent = {
+                time: t,
+                type: eventType
+            };
 
-                var player = this.mediaElement.player;
+            // Clear any existing timeouts
+            clearTimeout(this.eventTimeout);
 
-                player.options.alwaysShowControls = true;
-                player.options.hideVideoControlsOnLoad = false;
-                player.enableControls();
-                player.showControls();
-
-                this.$('.mejs-playpause-button button').attr({
-                    "role": "button"
-                });
-                var screenReaderVideoTagFix = $("<div role='region' aria-label='.'>");
-                this.$('.mejs-playpause-button').prepend(screenReaderVideoTagFix);
-
-                this.$('.mejs-time, .mejs-time-rail').attr({
-                    "aria-hidden": "true"
-                });
+            // Always trigger 'ended' events
+            if (eventType === 'ended') {
+                return this.triggerGlobalEvent(eventType);
             }
+
+            // Fire the event after a delay, only if another event has not just been fired
+            if (timeSinceLastEvent > debounceTime) {
+                this.eventTimeout = setTimeout(this.triggerGlobalEvent.bind(this, eventType), debounceTime);
+            }
+        },
+
+        triggerGlobalEvent: function(eventType) {
+            Adapt.trigger('media', {
+                isVideo: this.mediaElement.player.isVideo,
+                type: eventType,
+                src: this.mediaElement.src,
+                platform: this.mediaElement.pluginType
+            });
         },
 
         setVideoVolume: function() {
           if (!this.mediaElement) return;
           // Check for audio extension
+          if (!Adapt.audio) return;
           if (Adapt.course.get("_audio") && Adapt.course.get("_audio")._isEnabled) {
             // If audio is turned on
-            if(Adapt.audio.audioStatus == 1){
-              if(this.model.has('_startVolume')) {
+            if (Adapt.audio.audioStatus == 1){
+              if (this.model.has('_startVolume')) {
                 this.mediaElement.player.setVolume(parseInt(this.model.get('_startVolume'))/100);
               } else {
                 this.mediaElement.player.setVolume(this.mediaElement.player.options.startVolume);
@@ -658,7 +775,7 @@ define([
               this.mediaElement.player.setVolume(0);
             }
           } else {
-            if(this.model.has('_startVolume')) {
+            if (this.model.has('_startVolume')) {
               this.mediaElement.player.setVolume(parseInt(this.model.get('_startVolume'))/100);
             } else {
               this.mediaElement.player.setVolume(this.mediaElement.player.options.startVolume);
@@ -667,12 +784,7 @@ define([
         },
 
         initNotify: function() {
-          if(this.isPopupOpen) return;
-
-          Adapt.trigger("notify:popup", {
-            title: this.model.get('_transcript').inlineTranscriptTitle,
-            body: this.model.get('_transcript').inlineTranscriptBody
-          });
+          if (this.isPopupOpen) return;
 
           this.isPopupOpen = true;
 
@@ -680,17 +792,30 @@ define([
             this.setCompletionStatus();
           }
 
-          Adapt.once("notify:closed", _.bind(function() {
+          Adapt.trigger("notify:popup", {
+              title: this.model.get('_transcript').inlineTranscriptTitle,
+              body: this.model.get('_transcript').inlineTranscriptBody,
+              _isCancellable: true,
+              _showCloseButton: true,
+              _closeOnBackdrop: true,
+              _classes: ' media-autoplay'
+          });
+
+          this.listenToOnce(Adapt, {
+              'popup:closed': this.onPopupClosed
+          });
+        },
+
+        onPopupClosed: function() {
             this.isPopupOpen = false;
-          }, this));
         },
 
         setupSubtitlesMenu: function() {
           var langs = this.model.get('_media').cc;
           var numLangs = langs.length;
 
-          var langArray = new Array();
-          var srclangArray = new Array();
+          var langArray = [];
+          var srclangArray = [];
 
           for (var i = 0; i < numLangs; i++) {
             srclangArray[i] = langs[i].srclang;
@@ -785,6 +910,7 @@ define([
         },
 
         onMediaElementCaptionsChange: function() {
+          if (!this.mediaElement) return;
           var player = this.mediaElement.player;
           // Delay so the var has time to update
           _.delay(_.bind(function() {
@@ -799,8 +925,9 @@ define([
 
     });
 
-    Adapt.register('media-autoplay', MediaAutoplay);
-
-    return MediaAutoplay;
+    return Adapt.register('media-autoplay', {
+        model: ComponentModel.extend({}),// create a new class in the inheritance chain so it can be extended per component type if necessary later
+        view: MediaAutoplayView
+    });
 
 });

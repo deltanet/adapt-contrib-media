@@ -191,10 +191,10 @@ IE9 | Vimeo: ‘Sorry this video does not exist’.
 IE8 | <ul><li>Due to the lack of support for HTML audio/video, users will need to have [Adobe Flash Player](https://get.adobe.com/flashplayer/) v10 (or better) or Microsoft [Silverlight](https://www.microsoft.com/getsilverlight/get-started/install/) installed to enable media playback.</li><li>YouTube: control bar missing</li><li>YouTube/Vimeo: doesn’t track play/ended events</li></ul>
 
 ----------------------------
-**Version number:**  2.1.16  
-**Framework versions:** 2.0  
+**Version number:**  3.0.0  
+**Framework versions:** 4+  
 **Author / maintainer:** Deltanet, plus forked code from Adapt Core Team, [contributors](https://github.com/deltanet/adapt-media-autoplay/graphs/contributors)  
 **Accessibility support:** To be reviewed.  
 **RTL support:** yes  
-**Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), IE 11, IE10, IE9, IE8, IE Mobile 11, Safari for iPhone (iOS 7+8), Safari for iPad (iOS 7+8), Safari 8, Opera     
+**Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), Edge, IE11, IE Mobile 11, Safari 11+12 for macOS+iOS     
 **Authoring tool support:** yes  
