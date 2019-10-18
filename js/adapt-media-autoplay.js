@@ -351,6 +351,8 @@ define([
         },
 
         onMediaElementPlay: function(event) {
+            Adapt.trigger('audio:stopAllChannels');
+
             this.queueGlobalEvent('play');
 
             Adapt.trigger("media:stop", this);
