@@ -120,6 +120,7 @@ define([
 
         notifyClosed: function() {
             this.notifyIsOpen = false;
+
             if (this.videoIsInView == true && this.mediaCanAutoplay && this.firstRun) {
               _.delay(_.bind(function() {
                   this.playMediaElement(true);
@@ -347,6 +348,11 @@ define([
         },
 
         pageReady: function () {
+            // Check if notify is visible
+            if ($('body').children('.notify').css('visibility') == 'visible') {
+                this.notifyOpened();
+            }
+
             this.$('.component-widget').on("onscreen", _.bind(this.onscreen, this));
         },
 
@@ -501,7 +507,7 @@ define([
         playMediaElement: function(state) {
             if (!this.mediaElement) return;
 
-            if (this.model.get('_isVisible') && state) {
+            if (this.model.get('_isVisible') && state && this.videoIsInView) {
                 Adapt.trigger('audio:stopAllChannels');
                 this.mediaElement.play();
                 // Set to false to stop autoplay when onscreen again
