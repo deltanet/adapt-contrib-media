@@ -89,6 +89,7 @@ define([
 
             this.firstRun = true;
             this.notifyIsOpen = false;
+            this.videoIsInView = false;
 
             if (this.model.get('_media').source) {
                 // Remove the protocol for streaming service.
@@ -491,13 +492,14 @@ define([
             var isOnscreenX = measurements.percentInviewHorizontal == 100;
 
             if (isOnscreenY && isOnscreenX) {
+                this.videoIsInView = true;
+
                 if (this.model.get('_autoPlay') && this.notifyIsOpen == false && this.mediaCanAutoplay == true) {
                     this.playMediaElement(true);
                 }
                 if (this.model.get('_setCompletionOn') == 'inview') {
                     this.setCompletionStatus();
                 }
-                this.videoIsInView = true;
             } else {
                 this.playMediaElement(false);
                 this.videoIsInView = false;
