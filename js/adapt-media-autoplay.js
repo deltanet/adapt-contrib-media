@@ -488,6 +488,11 @@ define([
         },
 
         onscreen: function(event, measurements) {
+            // Check if notify is visible
+            if ($('body').children('.notify').css('visibility') == 'visible') {
+                this.notifyOpened();
+            }
+
             var isOnscreenY = (measurements.percentFromTop < 50) && (measurements.percentFromTop > -10);
             var isOnscreenX = measurements.percentInviewHorizontal == 100;
 
@@ -602,11 +607,6 @@ define([
 
             this.setReadyStatus();
             this.setupEventListeners();
-
-            // Check if notify is visible
-            if ($('body').children('.notify').css('visibility') == 'visible') {
-                this.notifyOpened();
-            }
         },
 
         positionInstruction: function () {
