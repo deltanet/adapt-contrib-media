@@ -607,6 +607,8 @@ define([
 
             this.setReadyStatus();
             this.setupEventListeners();
+
+            this.setVideoVolume();
         },
 
         positionInstruction: function () {
