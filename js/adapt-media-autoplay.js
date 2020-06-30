@@ -354,7 +354,9 @@ define([
                 this.notifyOpened();
             }
 
-            this.$('.component-widget').on("onscreen", _.bind(this.onscreen, this));
+            _.defer(_.bind(function() {
+                this.$('.component-widget').on("onscreen", _.bind(this.onscreen, this));
+            }, this));
         },
 
         onMediaElementPlay: function(event) {
