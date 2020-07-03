@@ -122,7 +122,7 @@ define([
         notifyClosed: function() {
             this.notifyIsOpen = false;
 
-            if (this.videoIsInView == true && this.mediaCanAutoplay && this.firstRun) {
+            if (this.videoIsInView && this.mediaCanAutoplay && this.firstRun) {
               _.delay(_.bind(function() {
                   this.playMediaElement(true);
               }, this), 400);
@@ -490,18 +490,18 @@ define([
         },
 
         onscreen: function(event, measurements) {
-            // Check if notify is visible
-            if ($('body').children('.notify').css('visibility') == 'visible') {
-                this.notifyOpened();
-            }
-
             var isOnscreenY = (measurements.percentFromTop < 50) && (measurements.percentFromTop > -10);
             var isOnscreenX = measurements.percentInviewHorizontal == 100;
 
             if (isOnscreenY && isOnscreenX) {
                 this.videoIsInView = true;
 
-                if (this.model.get('_autoPlay') && this.notifyIsOpen == false && this.mediaCanAutoplay == true) {
+                // Check if notify is visible
+                if ($('body').children('.notify').css('visibility') == 'visible') {
+                    this.notifyOpened();
+                }
+
+                if (this.notifyIsOpen == false && this.mediaCanAutoplay) {
                     this.playMediaElement(true);
                 }
                 if (this.model.get('_setCompletionOn') == 'inview') {
