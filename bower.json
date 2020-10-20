@@ -1,13 +1,13 @@
 {
-  "name": "adapt-contrib-media",
+  "name": "adapt-media-autoplay",
   "version": "5.0.1",
   "framework": ">=5",
-  "homepage": "https://github.com/adaptlearning/adapt-contrib-media",
-  "issues": "https://github.com/adaptlearning/adapt_framework/issues/new",
-  "component": "media",
-  "displayName": "Media",
-  "description": "Playback of video and audio with a Flash Player fallback",
-  "main": "/js/adapt-contrib-media.js",
+  "homepage": "https://github.com/deltanet/adapt-media-autoplay",
+  "issues": "https://github.com/deltanet/adapt-media-autoplay/issues",
+  "displayName": "Media Auto Play",
+  "component": "media-autoplay",
+  "description": "Playback of video and audio with a Flash Player fallback and the option to auto play",
+  "main": "/js/adapt-media-autoplay.js",
   "keywords": [
     "adapt-plugin",
     "adapt-component"

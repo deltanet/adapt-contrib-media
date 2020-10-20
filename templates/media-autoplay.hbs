@@ -1,0 +1,105 @@
+{{import_globals}}
+<div class="component__inner media-autoplay__inner">
+
+  {{> component this}}
+
+  {{#any _transcript._externalTranscript _transcript._inlineTranscript}}
+  <button class="aria-label js-skip-to-transcript" tabindex="-1" aria-label="{{_globals._components._media.skipToTranscript}}"></button>
+  {{/any}}
+
+  <div class="component__widget media-autoplay__widget a11y-ignore-aria">
+
+    <div class="media-options-container">
+      {{#if _showCaptionsButton}}
+        <div class="media-subtitles-container">
+          <div class="media-subtitles-button-container">
+            <button class="options-button icon {{#if _closedCaptionsIcon}}{{_closedCaptionsIcon}}{{else}}icon-comment{{/if}} media-subtitles-button" aria-label="{{_globals._components._media-autoplay.ariaCaptionsLabel}}"></button>
+          </div>
+          <div class="media-subtitles-options">
+            <button class="media-subtitles-option" srclang="none">
+              <div class="media-subtitles-option-icon icon icon-radio-unchecked"></div>
+              <div class="media-subtitles-option-title">{{#if closedCaptionsNoneButton}}{{closedCaptionsNoneButton}}{{else}}None{{/if}}</div>
+            </button>
+            {{#each _media.cc}}
+              <button class="media-subtitles-option" srclang="{{srclang}}">
+                <div class="media-subtitles-option-icon icon icon-radio-unchecked"></div>
+                <div class="media-subtitles-option-title">{{srclang}}</div>
+              </button>
+            {{/each}}
+          </div>
+        </div>
+      {{/if}}
+      {{#if _transcript._isEnabled}}
+        <div class="media-transcript-button-container">
+          {{#if _transcript._inlineTranscript}}
+            {{#if _transcript.inlineTranscriptButton}}
+              <button class="options-button media-inline-transcript-button" aria-label="{{_globals._components._media-autoplay.ariaTranscriptLabel}}">{{_transcript.inlineTranscriptButton}}</button>
+            {{else}}
+              <button class="options-button icon icon-menu media-inline-transcript-button" aria-label="{{_globals._components._media-autoplay.ariaTranscriptLabel}}"></button>
+            {{/if}}
+          {{/if}}
+          {{#if _transcript._externalTranscript}}
+            <button onclick="window.open('{{_transcript.transcriptLink}}')" class="options-button icon icon-menu media-external-transcript-button">
+              <div class="transcript-text-container"></button>
+          {{/if}}
+        </div>
+      {{/if}}
+    </div>
+
+
+  {{#if _media.mp3}}
+    {{#if _media.poster}}
+    <img class="media_poster is-audio" src="{{_media.poster}}">
+    {{/if}}
+    <audio src="{{_media.mp3}}" type="audio/mp3" style="width: 100%; height: 100%;"/>
+  {{else}}
+    {{#if _media.ogg}}
+      <audio src="{{_media.ogg}}" type="audio/ogg" style="width: 100%; height: 100%;"/>
+    {{else}}
+      <video aria-hidden="true" preload="none" width="640" height="360" {{#if _playsinline}}playsinline{{/if}} {{#equals _media.type "video/vimeo"}}{{else}}poster="{{_media.poster}}"{{/equals}} style="width:100%; height:100%;" controls="controls">
+        {{#if _media.source}}
+          <source src="{{_media.source}}" type="{{_media.type}}"/>
+        {{else}}
+          {{#if _media.mp4}}
+            <source src="{{_media.mp4}}" type="video/mp4"/>
+          {{/if}}
+          {{#if _media.ogv}}
+            <source src="{{_media.ogv}}" type="video/ogg"/>
+          {{/if}}
+          {{#if _media.webm}}
+            <source src="{{_media.webm}}" type="video/webm"/>
+          {{/if}}
+        {{/if}}
+        {{#if _useClosedCaptions}}
+          {{#each _media.cc}}
+            <track kind="subtitles" src="{{src}}" type="text/vtt" srclang="{{srclang}}" />
+          {{/each}}
+        {{/if}}
+      </video>
+    {{/if}}
+  {{/if}}
+  </div>
+
+  {{#if _transcript}}
+  <div class="media-autoplay__transcript-container">
+
+    {{#if _transcript._inlineTranscript}}
+    <div class="media-autoplay__transcript-body-inline" role="region" aria-label="{{#if _transcript.inlineTranscriptButton}}{{_transcript.inlineTranscriptButton}}{{else}}{{_transcript.transcriptLink}}{{/if}}">
+      <div class="media-autoplay__transcript-body-inline-inner">
+        {{{compile _transcript.inlineTranscriptBody}}}
+      </div>
+    </div>
+    {{/if}}
+
+  </div>
+  {{/if}}
+
+  {{#if _videoInstruction._isEnabled}}
+  <div class="media-instruction-container">
+      <div class="{{_component}}-instruction video-instruction">
+          <div class="{{_component}}-instruction-inner component-instruction-inner"></div>
+      </div>
+  </div>
+  {{/if}}
+
+</div>

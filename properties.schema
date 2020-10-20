@@ -129,7 +129,8 @@
                 "default": "",
                 "title": "Caption File",
                 "inputType": "Asset:other",
-                "validators": ["required"]
+                "validators": ["required"],
+                "help": "This file should be in the .vtt file format"
               }
             }
           }
@@ -140,11 +141,27 @@
       "type": "string",
       "required": true,
       "enum": ["inview", "play", "ended"],
-      "default": "play",
+      "default": "inview",
       "title": "Completion trigger",
       "inputType": {"type": "Select", "options":["inview", "play", "ended"]},
       "validators": ["required"],
       "help": "Defines what media event should trigger completion of this component."
+    },
+    "_autoPlay": {
+      "type":"boolean",
+      "required": false,
+      "default": false,
+      "title": "Autoplay Is Enabled",
+      "inputType": "Checkbox",
+      "validators": []
+    },
+    "_autoPlayOnce": {
+      "type":"boolean",
+      "required": false,
+      "default": false,
+      "title": "Autoplay Once Is Enabled",
+      "inputType": "Checkbox",
+      "validators": []
     },
     "_useClosedCaptions": {
       "type": "boolean",
@@ -152,6 +169,30 @@
       "default": false,
       "title": "Use Closed Captions",
       "inputType": "Checkbox",
+      "validators": []
+    },
+    "_showCaptionsButton": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "title": "Show Closed Captions Button",
+      "inputType": "Checkbox",
+      "validators": []
+    },
+    "_closedCaptionsIcon": {
+      "type": "string",
+      "required": false,
+      "default": "icon-cc",
+      "title": "Closed Captions Icon",
+      "inputType": "Text",
+      "validators": []
+    },
+    "closedCaptionsNoneButton": {
+      "type": "string",
+      "required": false,
+      "default": "None",
+      "title": "Closed Captions None Button",
+      "inputType": "Text",
       "validators": []
     },
     "_startLanguage": {
@@ -166,15 +207,24 @@
     "_showVolumeControl": {
       "type": "boolean",
       "required": false,
-      "default": false,
+      "default": true,
       "title": "Show Volume Control (Not supported on mobile devices)",
       "inputType": "Checkbox",
       "validators": [],
       "help": "When enabled, the volume control will appear in the media player. On mobile devices the audio level is controlled the device's physical volume controls."
     },
+    "_showReplayOverlay": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "title": "Show Replay Button",
+      "inputType": "Checkbox",
+      "validators": [],
+      "help": "When enabled, the play button will be replaced with a replay button."
+    },
     "_startVolume": {
       "type": "string",
-      "required":true,
+      "required":false,
       "enum": ["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"],
       "default": "80%",
       "title": "Default volume (Not supported on mobile devices)",
@@ -216,11 +266,103 @@
       "validators": [],
       "help": "If enabled, will attempt to prevent users from skipping ahead in audio/video."
     },
+    "_videoInstruction": {
+      "type":"object",
+      "required":false,
+      "title": "Media Instructions",
+      "properties":{
+        "_isEnabled": {
+          "type":"boolean",
+          "required": false,
+          "default": false,
+          "title": "Is Enabled",
+          "inputType": "Checkbox",
+          "validators": [],
+          "help": "Enables instruction text at the start and end of the media."
+        },
+        "_position": {
+          "type": "number",
+          "required": false,
+          "inputType": "Number",
+          "title": "Position",
+          "default": 75,
+          "validators": ["number"],
+          "help": "Set the position on screen for the instruction bar. This is as a percentage from the top of the media element."
+        },
+        "_hideOnRevisit": {
+          "type":"boolean",
+          "required": false,
+          "default": false,
+          "title": "Hide On Revisit",
+          "inputType": "Checkbox",
+          "validators": [],
+          "help": "Controls whether the instruction text is hidden when a user revisits the component."
+        },
+        "_first": {
+          "type":"object",
+          "required":true,
+          "title": "Text On First Visit",
+          "properties":{
+            "start": {
+              "type": "string",
+              "required": false,
+              "default": "",
+              "title": "Start Text",
+              "inputType": "Text",
+              "validators": [],
+              "translatable": true
+            },
+            "end": {
+              "type": "string",
+              "required": false,
+              "default": "",
+              "title": "End Text",
+              "inputType": "Text",
+              "validators": [],
+              "translatable": true
+            }
+          }
+        },
+        "_revisit": {
+          "type":"object",
+          "required":true,
+          "title": "Text On Re-Visit",
+          "properties":{
+            "start": {
+              "type": "string",
+              "required": false,
+              "default": "",
+              "title": "Start Text",
+              "inputType": "Text",
+              "validators": [],
+              "translatable": true
+            },
+            "end": {
+              "type": "string",
+              "required": false,
+              "default": "",
+              "title": "End Text",
+              "inputType": "Text",
+              "validators": [],
+              "translatable": true
+            }
+          }
+        }
+      }
+    },
     "_transcript": {
       "type": "object",
       "required": false,
       "title": "Transcript Options",
       "properties": {
+        "_isEnabled": {
+          "type":"boolean",
+          "required": false,
+          "default": false,
+          "title": "Is Enabled",
+          "inputType": "Checkbox",
+          "validators": []
+        },
         "_setCompletionOnView": {
           "type": "boolean",
           "required": false,
@@ -264,11 +406,21 @@
           "validators": [],
           "translatable": true
         },
+        "inlineTranscriptTitle": {
+          "type": "string",
+          "required": false,
+          "default": "",
+          "title": "Inline Transcript Title",
+          "inputType": "Text",
+          "validators": [],
+          "help": "Optional text for the transcript tile",
+          "translatable": true
+        },
         "inlineTranscriptBody": {
           "type": "string",
           "required": false,
           "default": "",
-          "title": "Inline Transcript",
+          "title": "Inline Transcript Body",
           "inputType": "TextArea",
           "validators": [],
           "help": "Optional text appears below the video",

@@ -11,13 +11,19 @@
         "instruction": "Select the play button to start the video.",
         "_comment": "_setCompletionOn = inview | play | ended",
         "_setCompletionOn": "play",
+        "_autoPlay":true,
+        "_autoPlayOnce":true,
+        "_showCaptionsButton":true,
         "_useClosedCaptions": true,
+        "closedCaptionsNoneButton": "None",
+        "_closedCaptionsIcon": "icon-cc",
         "_allowFullScreen": true,
         "_pauseWhenOffScreen": false,
         "_playsinline": false,
         "_preventForwardScrubbing": false,
         "_startLanguage": "en",
         "_showVolumeControl": true,
+        "_showReplayOverlay":true,
         "_startVolume": "80%",
         "_media": {
             "mp4": "course/assets/big_buck_bunny.mp4",
@@ -34,12 +40,27 @@
                 }
             ]
         },
+        "_videoInstruction": {
+          "_isEnabled": true,
+          "_position": 75,
+          "_hideOnRevisit": false,
+          "_first": {
+            "start": "",
+            "end": ""
+          },
+          "_revisit": {
+            "start": "",
+            "end": ""
+          }
+        },
         "_transcript": {
+            "_isEnabled": true,
             "_setCompletionOnView": true,
             "_inlineTranscript": true,
             "_externalTranscript": false,
             "inlineTranscriptButton": "Transcript",
             "inlineTranscriptCloseButton": "Close Transcript",
+            "inlineTranscriptTitle": "Transcript",
             "inlineTranscriptBody": "Transcript body text should go here",
             "transcriptLinkButton": "Transcript",
             "transcriptLink": "assets/transcript.pdf"

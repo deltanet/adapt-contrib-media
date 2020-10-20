@@ -1,4 +1,4 @@
-.media {
+.media-autoplay {
   // Transcript
   // --------------------------------------------------
   &__transcript-body-inline {
@@ -55,5 +55,70 @@
   // --------------------------------------------------
   &.toggle-captions .mejs-captions-selector {
     .u-display-none;
+  }
+
+  .media-options-container {
+    position: absolute;
+    z-index: 1;
+    right: @btn-padding;
+    .dir-rtl & {
+      right: inherit;
+      left: @btn-padding;
+    }
+  }
+
+  .options-button {
+    color: @item-color-inverted;
+    padding: @item-padding;
+    min-height: @icon-size + (@item-padding*2);
+    float: right;
+    .dir-rtl & {
+      float: left;
+    }
+  }
+
+  .media-subtitles-container {
+    float: left;
+    .dir-rtl & {
+      float: right;
+    }
+  }
+
+  .media-subtitles-button {
+    &.cc-off {
+      color: @disabled-inverted;
+    }
+  }
+
+  .media-subtitles-options {
+    display: none;
+    float: right;
+    .dir-rtl & {
+      float: left;
+    }
+  }
+
+  .media-subtitles-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    .dir-rtl & {
+      text-align: right;
+    }
+  }
+
+  .media-subtitles-option-icon {
+    margin-right: @item-padding;
+    color: @item-color-inverted;
+    float: left;
+    .dir-rtl & {
+      margin-left: @item-padding;
+      float: right;
+    }
+  }
+
+  .media-subtitles-option-title {
+    display: inline-block;
+    vertical-align: middle;
   }
 }
