@@ -826,7 +826,7 @@ define([
           this.setCompletionStatus();
         }
 
-        Adapt.trigger("notify:popup", {
+        Adapt.notify.popup({
             title: this.model.get('_transcript').inlineTranscriptTitle,
             body: this.model.get('_transcript').inlineTranscriptBody,
             _isCancellable: true,
