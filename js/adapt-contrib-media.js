@@ -105,7 +105,15 @@ define([
 
             var modelOptions = this.model.get('_playerOptions');
 
-            if (modelOptions.pluginPath === undefined) modelOptions.pluginPath = 'assets/';
+            if (modelOptions.pluginPath === undefined) {
+              // on the off-chance anyone still needs to use the Flash-based player...
+              _.extend(modelOptions, {
+                pluginPath: 'https://cdnjs.cloudflare.com/ajax/libs/mediaelement/2.21.2/',
+                flashName: 'flashmediaelement-cdn.swf',
+                flashScriptAccess: 'always'
+              });
+            }
+
             if (modelOptions.features === undefined) {
                 modelOptions.features = ['playpause','progress','current','duration'];
                 if (this.model.get('_useClosedCaptions')) {
@@ -486,7 +494,7 @@ define([
                 this.$(".mejs-container").attr("tabindex", 0);
             }
         },
-        
+
         cleanUpPlayerAfter: function() {
             this.$("[aria-valuemax='NaN']").attr("aria-valuemax", 0);
         },
