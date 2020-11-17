@@ -68,10 +68,18 @@
   }
 
   .options-button {
-    color: @item-color-inverted;
-    background-color: @item-color;
+    background-color: @btn-color;
+    color: @btn-color-inverted;
+
+    .no-touch &:hover {
+      background-color: @btn-color-hover;
+      color: @btn-color-inverted-hover;
+      .transition(background-color @duration ease-in, color @duration ease-in;);
+    }
+
     padding: @btn-padding;
     min-height: @icon-size + (@btn-padding*2);
+
     float: right;
     .dir-rtl & {
       float: left;
@@ -90,6 +98,10 @@
     .dir-rtl & {
       float: right;
     }
+  }
+
+  .media-inline-transcript-button {
+    font-weight: bold;
   }
 
   .media-subtitles-button {
@@ -111,12 +123,19 @@
   .media-subtitles-option {
     display: block;
     padding: @btn-padding;
-    background-color: @item-color;
-    color: @item-color-inverted;
     width: 100%;
     text-align: left;
     .dir-rtl & {
       text-align: right;
+    }
+
+    background-color: @btn-color;
+    color: @btn-color-inverted;
+
+    .no-touch &:hover {
+      background-color: @btn-color-hover;
+      color: @btn-color-inverted-hover;
+      .transition(background-color @duration ease-in, color @duration ease-in;);
     }
   }
 
@@ -135,12 +154,26 @@
     vertical-align: middle;
   }
 
-  .icon-cc:before {
-  	font-family: 'closedcaptions';
-  	content: '\e901';
+  .media-instruction-container {
+    position: absolute;
   }
 
-  .icon-menu:before {
-  	content: '\e63c';
+  .video-instruction {
+    .instruction-text;
+    padding: @component-body-margin;
+    background-color: @background;
+    text-align: center;
   }
+}
+
+@font-face {
+	font-family: 'closedcaptions';
+  src: url(fonts/closedcaptions.woff);
+	font-weight: normal;
+	font-style: normal;
+}
+
+.icon-cc:before {
+	font-family: 'closedcaptions';
+	content: '\e901';
 }
