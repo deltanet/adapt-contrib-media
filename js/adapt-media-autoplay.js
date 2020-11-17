@@ -910,6 +910,15 @@ define([
         }
       },
 
+      updateSubtitlesOption: function(lang) {
+        var $link = this.$(".media-subtitles-options").find("button[srclang="+lang+"]");
+
+        this.resetSubtitlesMenu();
+
+        $link.find(".media-subtitles-option-icon").removeClass("icon-radio-unchecked");
+        $link.find(".media-subtitles-option-icon").addClass("icon-radio-checked");
+        },
+
       resetSubtitlesMenu:function () {
         this.$(".media-subtitles-option-icon").removeClass("icon-radio-checked");
         this.$(".media-subtitles-option-icon").removeClass("icon-radio-unchecked");
