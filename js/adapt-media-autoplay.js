@@ -531,6 +531,12 @@ define([
                 if (this.mediaAutoplayOnce) {
                     this.mediaCanAutoplay = false;
                 }
+
+                // Trigger again after a delay to catch any audio triggered via scrolling the page quickly
+                _.delay(_.bind(function() {
+                  Adapt.trigger('audio:stopAllChannels');
+                }, this), 500);
+
             } else if (state === false) {
                 this.mediaElement.pause();
             }
