@@ -3298,7 +3298,7 @@ if (typeof jQuery != 'undefined') {
 				track = $(track);
 
 				t.tracks.push({
-					srclang: (track.attr('srclang')) ? track.attr('srclang').toLowerCase() : '',
+					srclang: (track.attr('srclang')) ? track.attr('srclang') : '',
 					src: track.attr('src'),
 					kind: track.attr('kind'),
 					label: track.attr('label') || '',
