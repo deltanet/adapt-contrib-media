@@ -504,12 +504,7 @@ define([
             if (isOnscreenY && isOnscreenX) {
                 this.videoIsInView = true;
 
-                // Check if notify is visible
-                if ($('body').children('.notify').css('visibility') == 'visible') {
-                    this.notifyOpened();
-                }
-
-                if (this.notifyIsOpen == false && this.mediaCanAutoplay) {
+                if (!this.notifyIsOpen && this.mediaCanAutoplay) {
                     this.playMediaElement(true);
                 }
                 if (this.model.get('_setCompletionOn') == 'inview') {
