@@ -94,6 +94,7 @@ define([
       this.firstRun = true;
       this.notifyIsOpen = false;
       this.videoIsInView = false;
+      this.onscreenTriggered = false;
 
       if (this.model.get('_media').source) {
         var media = this.model.get('_media');
@@ -737,22 +738,42 @@ define([
       },
 
       onscreen: function(event, measurements) {
-          var isOnscreenY = (measurements.percentFromTop < 50) && (measurements.percentFromTop > -10);
-          var isOnscreenX = measurements.percentInviewHorizontal == 100;
-
-          if (isOnscreenY && isOnscreenX) {
-              this.videoIsInView = true;
-
-              if (!this.notifyIsOpen && this.mediaCanAutoplay) {
-                  this.playMediaElement(true);
-              }
-              if (this.model.get('_setCompletionOn') == 'inview') {
-                  this.setCompletionStatus();
-              }
-          } else {
-              this.playMediaElement(false);
-              this.videoIsInView = false;
+        _.delay(_.bind(function() {
+          // Check if notify is visible
+          if ($('body').children('.notify').css('visibility') == 'visible') {
+            this.notifyOpened();
           }
+
+          this.checkOnscreen(measurements);
+
+        }, this), 500);
+      },
+
+      checkOnscreen: function(measurements) {
+        var visible = this.model.get('_isVisible');
+
+        var isOnscreenY = (measurements.percentFromTop < 50) && (measurements.percentFromTop > -10);
+        var isOnscreenX = measurements.percentInviewHorizontal == 100;
+
+        if (visible && isOnscreenY && isOnscreenX && !this.onscreenTriggered) {
+          this.videoIsInView = true;
+
+          if (!this.notifyIsOpen && this.mediaCanAutoplay) {
+            this.playMediaElement(true);
+          }
+          if (this.model.get('_setCompletionOn') == 'inview') {
+            this.setCompletionStatus();
+          }
+
+          // Set to true to stop onscreen looping
+          this.onscreenTriggered = true;
+        }
+
+        // Check when element is off screen
+        if (visible && (!isOnscreenY || !isOnscreenX)) {
+          this.videoIsInView = false;
+          this.onscreenTriggered = false;
+        }
       },
 
       playMediaElement: function(state) {
