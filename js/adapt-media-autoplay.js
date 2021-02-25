@@ -534,6 +534,7 @@ define([
           if (visible && (!isOnscreenY || !isOnscreenX)) {
             this.videoIsInView = false;
             this.onscreenTriggered = false;
+            this.playMediaElement(false);
           }
         },
 
