@@ -1,7 +1,7 @@
 {
   "name": "adapt-media-autoplay",
-  "version": "3.0.14",
-  "framework": ">=4",
+  "version": "5.0.1",
+  "framework": ">=5",
   "homepage": "https://github.com/deltanet/adapt-media-autoplay",
   "issues": "https://github.com/deltanet/adapt-media-autoplay/issues",
   "displayName": "Media Auto Play",
@@ -12,5 +12,5 @@
     "adapt-plugin",
     "adapt-component"
   ],
-  "license": "GPLv3"
+  "license": "GPL-3.0"
 }
