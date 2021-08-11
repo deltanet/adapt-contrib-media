@@ -14,19 +14,9 @@ Whilst the underlying MediaElement player does have support for playing both You
 
 ## Installation
 
-As one of Adapt's *[core components](https://github.com/adaptlearning/adapt_framework/wiki/Core-Plug-ins-in-the-Adapt-Learning-Framework#components),* **Media** is included with the [installation of the Adapt framework](https://github.com/adaptlearning/adapt_framework/wiki/Manual-installation-of-the-Adapt-framework#installation) and the [installation of the Adapt authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki/Installing-Adapt-Origin).
+This plugin must be installed manually.
 
-* If **Media** has been uninstalled from the Adapt framework, it may be reinstalled.
-With the [Adapt CLI](https://github.com/adaptlearning/adapt-cli) installed, run the following from the command line:  
-`adapt install adapt-contrib-media`
 
-    Alternatively, this component can also be installed by adding the following line of code to the *adapt.json* file:  
-    `"adapt-contrib-media": "*"`  
-    Then running the command:  
-    `adapt install`  
-    (This second method will reinstall all plug-ins listed in *adapt.json*.)  
-
-* If **Media** has been uninstalled from the Adapt authoring tool, it may be reinstalled using the [Plug-in Manager](https://github.com/adaptlearning/adapt_authoring/wiki/Plugin-Manager).  
 <div float align=right><a href="#top">Back to Top</a></div>
 
 ## Settings Overview
@@ -43,8 +33,7 @@ The attributes listed below are used in *components.json* to configure **Media**
 
 **\_layout** (string): This defines the horizontal position of the component in the block. Acceptable values are `full`, `left` or `right`.  
 
-**instruction** (string): This optional text appears above the component. It is frequently used to
-guide the learner’s interaction with the component.  
+**instruction** (string): This optional text appears above the component. It is frequently used to guide the learner’s interaction with the component.  
 
 **\_setCompletionOn** (string): This determines when Adapt will register this component as having been completed by the user. Acceptable values are `inview` (triggered when the component is fully displayed within the viewport), `play` (triggered when playback is initiated), or `ended` (triggered when the video has reached the end of playback).
 
@@ -69,6 +58,8 @@ guide the learner’s interaction with the component.
 **\_showVolumeControl** (boolean): If enabled, the volume control will appear in the media player (Not supported on mobile devices)
 
 **\_startVolume** (string): Defines the default volume as a percentage (Not supported on mobile devices).  This can be set with or without the percentage sign in the string
+
+**_showReplayOverlay** (boolean): When enabled, the play button will be replaced with a replay button after the video has completed.
 
 **_showReplayOverlay** (boolean): When enabled, the play button will be replaced with a replay button after the video has completed.
 
@@ -117,7 +108,7 @@ The decision to include more than one file format is typically based on the brow
 
 >**inlineTranscriptTitle** (string): This optional text appears as the notify title for the transcript.
 
->**inlineTranscriptBody** (string): This optional text appears below the video. If provided, its visibility is toggled by clicking the transcript button. It is hidden by default.
+>**inlineTranscriptBody** (string): This optional text appears as the notify body for the transcript.
 
 >**transcriptLinkButton** (string): This text appears on the button that links to the optional external transcript. If no text is provided, the **transcriptLink** will be displayed on the button.
 
@@ -143,8 +134,8 @@ The attributes described above focus on the component's use with standard video.
 **YouTube video example:**
 ```json
 "_media": {
-	"source": "//www.youtube.com/watch?v=RT-KmgAgxuo",
-	"type": "video/youtube"
+  "source": "//www.youtube.com/watch?v=RT-KmgAgxuo",
+  "type": "video/youtube"
 },
 ```  
 Note: it is strongly suggested you use the dedicated [YouTube component](https://github.com/adaptlearning/adapt-youtube) if you want to include YouTube videos in your Adapt course.
@@ -152,8 +143,8 @@ Note: it is strongly suggested you use the dedicated [YouTube component](https:/
 **Vimeo video example:**
 ```json
 "_media": {
-	"source": "//player.vimeo.com/video/96961553",
-	"type": "video/vimeo"
+  "source": "//player.vimeo.com/video/96961553",
+  "type": "video/vimeo"
 },
 ```  
 Note: it is strongly suggested you use the dedicated [Vimeo component](https://github.com/adaptlearning/adapt-contrib-vimeo) if you want to include Vimeo videos in your Adapt course.
@@ -161,8 +152,8 @@ Note: it is strongly suggested you use the dedicated [Vimeo component](https://g
 **Audio example:**
 ```json
 "_media": {
-	"mp3": "course/en/audio/audio.mp3",
-	"ogg": "course/en/audio/audio.ogg"
+  "mp3": "course/en/audio/audio.mp3",
+  "ogg": "course/en/audio/audio.ogg"
 },
 ```  
 
@@ -178,16 +169,19 @@ Whenever playback is initiated, the component will emit a `media:stop` event to 
 Browser | Limitation |
 --------- | :----------- |
 Chrome   | No known issues.
-Firefox | No known issues.
+FireFox | No known issues.
 iOS/iPad | No known issues.
-Android | Firefox 33.1 with Vimeo: 'This video can't be played with your current setup'.
+Android | FireFox 33.1 with Vimeo: 'This video can't be played with your current setup'.
 Edge | No known issues.
 IE11 | No known issues.
+IE10 | No known issues.
+IE9 | Vimeo: ‘Sorry this video does not exist’.  
+IE8 | <ul><li>Due to the lack of support for HTML audio/video, users will need to have [Adobe Flash Player](https://get.adobe.com/flashplayer/) v10 (or better) or Microsoft [Silverlight](https://www.microsoft.com/getsilverlight/get-started/install/) installed to enable media playback.</li><li>YouTube: control bar missing</li><li>YouTube/Vimeo: doesn’t track play/ended events</li></ul>
 
 ----------------------------
 **Version number:**  5.0.1  <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a>  
 **Framework versions:** 5+  
-**Author / maintainer:** Deltanet, plus forked code from Adapt Core Team, [contributors](https://github.com/deltanet/adapt-media-autoplay/graphs/contributors) 
+**Author / maintainer:** Deltanet, plus forked code from Adapt Core Team, [contributors](https://github.com/deltanet/adapt-media-autoplay/graphs/contributors)
 **Accessibility support:** WAI AA  
 **RTL support:** Yes  
 **Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), Edge, IE11, Safari 12+13 for macOS/iOS/iPadOS, Opera  

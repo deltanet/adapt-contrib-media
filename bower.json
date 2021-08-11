@@ -6,7 +6,7 @@
   "issues": "https://github.com/deltanet/adapt-media-autoplay/issues",
   "displayName": "Media Auto Play",
   "component": "media-autoplay",
-  "description": "Playback of video and audio with a Flash Player fallback and the option to auto play",
+  "description": "Playback of video and audio and the option to auto play",
   "main": "/js/adapt-media-autoplay.js",
   "keywords": [
     "adapt-plugin",
