@@ -79,7 +79,6 @@ define([
         'media:stop': this.onMediaStop,
         'popup:opened': this.notifyOpened,
         'popup:closed': this.notifyClosed,
-        'pageView:ready': this.pageReady,
         'audio:updateAudioStatus': this.setVideoVolume
       });
 
@@ -203,6 +202,15 @@ define([
       this.mediaCanAutoplay = this.model.get('_autoPlay');
 
       this.setVideoVolume();
+
+      // Check if notify is visible
+      if ($('html').hasClass('notify')) {
+          this.notifyOpened();
+      }
+
+      //_.defer(_.bind(function() {
+          this.$('.component__widget').on("onscreen", _.bind(this.onscreen, this));
+      //}, this));
     },
 
     addMediaTypeClass: function() {
@@ -323,17 +331,6 @@ define([
         if(_.findWhere(this.model.get('_media').cc, {srclang: lang})) return lang;
 
         return this.model.get('_startLanguage') || 'none';
-      },
-
-      pageReady: function () {
-          // Check if notify is visible
-          if ($('body').children('.notify').css('visibility') == 'visible') {
-              this.notifyOpened();
-          }
-
-          _.defer(_.bind(function() {
-              this.$('.component__widget').on("onscreen", _.bind(this.onscreen, this));
-          }, this));
       },
 
       onMediaElementPlay: function(event) {
@@ -651,9 +648,6 @@ define([
         Adapt.trigger('media', eventObj);
       },
 
-
-      // Autoplay functions
-
       notifyOpened: function() {
           this.notifyIsOpen = true;
           this.playMediaElement(false);
@@ -741,7 +735,13 @@ define([
         _.delay(_.bind(function() {
           // Check if notify is visible
           if ($('body').children('.notify').css('visibility') == 'visible') {
+            //this.notifyOpened();
+          }
+
+          if ($('html').hasClass('notify')) {
             this.notifyOpened();
+          } else {
+            this.notifyClosed();
           }
 
           this.checkOnscreen(measurements);
