@@ -7,7 +7,7 @@
   "displayName": "Media Auto Play",
   "component": "media-autoplay",
   "description": "Playback of video and audio and the option to auto play",
-  "main": "/js/adapt-media-autoplay.js",
+  "main": "/js/adapt-contrib-media.js",
   "keywords": [
     "adapt-plugin",
     "adapt-component"
