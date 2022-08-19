@@ -970,4 +970,6 @@ class MediaAutoplayView extends ComponentView {
 
 MediaAutoplayView.froogaloopAdded = false;
 
+MediaAutoplayView.template = 'media-autoplay.jsx';
+
 export default MediaAutoplayView;
