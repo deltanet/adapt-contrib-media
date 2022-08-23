@@ -1,8 +1,8 @@
-import Adapt from 'core/js/adapt';
+import components from 'core/js/components';
 import MediaAutoplayView from './mediaView';
 import MediaAutoplayModel from './mediaModel';
 
-export default Adapt.register('media-autoplay', {
+export default components.register('media-autoplay', {
   model: MediaAutoplayModel,
   view: MediaAutoplayView
 });

@@ -7,7 +7,7 @@
   <button class="aria-label js-skip-to-transcript" tabindex="-1" aria-label="{{_globals._components._media.skipToTranscript}}"></button>
   {{/any}}
 
-  <div class="component__widget media-autoplay__widget a11y-ignore-aria">
+  <div class="component__widget media-autoplay__widget">
 
     <div class="media-options-container">
       {{#if _showCaptionsButton}}
@@ -46,7 +46,6 @@
       {{/if}}
     </div>
 
-
   {{#if _media.mp3}}
     {{#if _media.poster}}
     <img class="media_poster is-audio" src="{{_media.poster}}">
@@ -56,7 +55,12 @@
     {{#if _media.ogg}}
       <audio src="{{_media.ogg}}" type="audio/ogg" style="width: 100%; height: 100%;"/>
     {{else}}
-      <video aria-hidden="true" preload="none" width="640" height="360" {{#if _playsinline}}playsinline{{/if}} {{#equals _media.type "video/vimeo"}}{{else}}poster="{{_media.poster}}"{{/equals}} style="width:100%; height:100%;" controls="controls">
+      <video aria-hidden="true" preload="none"
+        {{#equals _aspectRatio "square"}} width="640" height="640"
+        {{else equals _aspectRatio "portrait"}} width="540" height="960"
+        {{else}} width="640" height="360"
+        {{/equals}}
+        {{#if _playsinline}} playsinline{{/if}} {{#equals _media.type "video/vimeo"}}{{else}}poster="{{_media.poster}}"{{/equals}} style="width:100%; height:100%;" controls="controls">
         {{#if _media.source}}
           <source src="{{_media.source}}" type="{{_media.type}}"/>
         {{else}}

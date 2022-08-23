@@ -1,17 +1,20 @@
 import Adapt from 'core/js/adapt';
+import offlineStorage from 'core/js/offlineStorage';
+import a11y from 'core/js/a11y';
+import logging from 'core/js/logging';
 import ComponentView from 'core/js/views/componentView';
 import 'libraries/mediaelement-and-player';
 import 'libraries/mediaelement-fullscreen-hook';
 
 /*
- * Default shortcut keys trap a screen reader user inside the player once in focus. These keys are unnecessary
- * as one may traverse the player in a linear fashion without needing to know or use shortcut keys. Below is
- * the removal of the default shortcut keys.
- *
- * The default seek interval functions are passed two different data types from mejs which they handle incorrectly. One
- * is a duration integer the other is the player object. The default functions error on slider key press and so break
- * accessibility. Below is a correction.
- */
+  * Default shortcut keys trap a screen reader user inside the player once in focus. These keys are unnecessary
+  * as one may traverse the player in a linear fashion without needing to know or use shortcut keys. Below is
+  * the removal of the default shortcut keys.
+  *
+  * The default seek interval functions are passed two different data types from mejs which they handle incorrectly. One
+  * is a duration integer the other is the player object. The default functions error on slider key press and so break
+  * accessibility. Below is a correction.
+  */
 Object.assign(window.mejs.MepDefaults, {
   keyActions: [],
   defaultSeekForwardInterval: duration => {
@@ -44,16 +47,56 @@ const purge = function (d) {
   }
 };
 
+/**
+ * Force the default language so that the aria-label can be localised from Adapt
+ * Note: Do not change these, their names and values are required for mapping in mejs
+ */
+window.mejs.i18n.locale.language = 'en-US';
+window.mejs.i18n.locale.strings['en-US'] = {};
+const ariaLabelMappings = {
+  playText: 'Play',
+  pauseText: 'Pause',
+  stopText: 'Stop',
+  audioPlayerText: 'Audio Player',
+  videoPlayerText: 'Video Player',
+  tracksText: 'Captions/Subtitles',
+  timeSliderText: 'Time Slider',
+  muteText: 'Mute Toggle',
+  unmuteStatusText: 'Unmute',
+  muteStatusText: 'Mute',
+  volumeSliderText: 'Volume Slider',
+  fullscreenText: 'Fullscreen',
+  goFullscreenText: 'Go Fullscreen',
+  turnOffFullscreenText: 'Turn off Fullscreen',
+  noneText: 'None',
+  skipBackText: 'Skip back %1 seconds',
+  allyVolumeControlText: 'Use Up/Down Arrow keys to increase or decrease volume.',
+  progessHelpText: 'Use Left/Right Arrow keys to advance one second, Up/Down arrows to advance ten seconds.'
+};
+
+Adapt.on('app:dataReady', () => {
+  // Populate the aria labels from the _global._components._media
+  const dynamicLabels = window.mejs.i18n.locale.strings['en-US'];
+  const fixedDefaults = window.mejs.MepDefaults;
+  const globals = Adapt.course.get('_globals')?._components?._media;
+  for (const k in ariaLabelMappings) {
+    dynamicLabels[ariaLabelMappings[k]] = globals[k] ?? ariaLabelMappings[k];
+    fixedDefaults[k] = dynamicLabels[ariaLabelMappings[k]];
+  }
+});
+
 class MediaAutoplayView extends ComponentView {
 
   events() {
     return {
       'click .media-inline-transcript-button': 'initNotify',
       'click .media-external-transcript-button': 'onExternalTranscriptClicked',
-      'click .js-skip-to-transcript': 'onSkipToTranscript',
       'click .media-subtitles-button': 'onSubtitlesClicked',
       'click .media-subtitles-option': 'onSubtitlesOptionClicked',
-      'click .mejs-captions-selector': 'onMediaElementCaptionsChange'
+      'click .mejs-captions-selector': 'onMediaElementCaptionsChange',
+      'click .js-media-inline-transcript-toggle': 'onToggleInlineTranscript',
+      'click .js-media-external-transcript-click': 'onExternalTranscriptClicked',
+      'click .js-skip-to-transcript': 'onSkipToTranscript'
     };
   }
 
@@ -82,8 +125,8 @@ class MediaAutoplayView extends ComponentView {
 
     // set initial player state attributes
     this.model.set({
-      '_isMediaEnded': false,
-      '_isMediaPlaying': false
+      _isMediaEnded: false,
+      _isMediaPlaying: false
     });
 
     this.firstRun = true;
@@ -96,7 +139,7 @@ class MediaAutoplayView extends ComponentView {
 
       // Avoid loading of Mixed Content (insecure content on a secure page)
       if (window.location.protocol === 'https:' && media.source.indexOf('http:') === 0) {
-        media.source = media.source.replace(/^http\:/, 'https:');
+        media.source = media.source.replace(/^http:/, 'https:');
       }
 
       this.model.set('_media', media);
@@ -108,6 +151,7 @@ class MediaAutoplayView extends ComponentView {
   postRender() {
     this.setupPlayer();
     this.addMejsButtonClass();
+
     // Set up instructions
     if (this.model.has('_videoInstruction')) {
       if (this.model.get('_videoInstruction')._isEnabled) {
@@ -157,19 +201,22 @@ class MediaAutoplayView extends ComponentView {
 
     if (this.model.get('_useClosedCaptions')) {
       const startLanguage = this.model.get('_startLanguage') || 'en';
-      if (!Adapt.offlineStorage.get('captions')) {
-        Adapt.offlineStorage.set('captions', startLanguage);
+
+      if (!offlineStorage.get('captions')) {
+        offlineStorage.set('captions', startLanguage);
       }
-      modelOptions.startLanguage = this.checkForSupportedCCLanguage(Adapt.offlineStorage.get('captions'));
 
       if (this.model.get('_showCaptionsButton')) {
         this.setupSubtitles();
       }
+
+      modelOptions.startLanguage = this.checkForSupportedCCLanguage(offlineStorage.get('captions'));
     }
 
     if (modelOptions.alwaysShowControls === undefined) {
       modelOptions.alwaysShowControls = false;
     }
+
     if (modelOptions.hideVideoControlsOnLoad === undefined) {
       modelOptions.hideVideoControlsOnLoad = true;
     }
@@ -184,14 +231,16 @@ class MediaAutoplayView extends ComponentView {
       const _media = this.model.get('_media');
       // if no media is selected - set ready now, as success won't be called
       if (!_media.mp3 && !_media.mp4 && !_media.ogv && !_media.webm && !_media.source) {
-        Adapt.log.warn('ERROR! No media is selected in components.json for component ' + this.model.get('_id'));
+
+        logging.warn('ERROR! No media is selected in components.json for component ' + this.model.get('_id'));
+
         this.setReadyStatus();
         return;
       }
+
       // Check if we're streaming
-      if (_media.source) {
-        this.$('.media-autoplay__widget').addClass('external-source');
-      }
+      if (!_media.source) return;
+      this.$('.media-autoplay__widget').addClass('external-source');
     });
 
     this.mediaAutoplayOnce = this.model.get('_autoPlayOnce');
@@ -209,15 +258,20 @@ class MediaAutoplayView extends ComponentView {
 
   addMediaTypeClass() {
     const media = this.model.get('_media');
-    if (media?.type) {
-      const typeClass = media.type.replace(/\//, '-');
-      this.$('.media-autoplay__widget').addClass(typeClass);
-    }
+
+    if (!media?.type) return;
+    const typeClass = media.type.replace(/\//, '-');
+    this.$('.media-autoplay__widget').addClass(typeClass);
   }
 
   addThirdPartyFixes(modelOptions, callback) {
     const media = this.model.get('_media');
     if (!media) return callback();
+
+    if (media.mp3 || media.ogg) {
+      // https://github.com/adaptlearning/adapt_framework/issues/3055
+      modelOptions.alwaysShowControls = true;
+    }
 
     switch (media.type) {
       case 'video/vimeo':
@@ -232,7 +286,7 @@ class MediaAutoplayView extends ComponentView {
           })
           .fail(() => {
             MediaView.froogaloopAdded = false;
-            console.log('Could not load froogaloop.js');
+            logging.error('Could not load froogaloop.js');
           });
         break;
       default:
@@ -241,9 +295,16 @@ class MediaAutoplayView extends ComponentView {
   }
 
   cleanUpPlayer() {
+    const containerLabel = this.model.get('displayTitle') || this.model.get('title');
     this.$('.media-autoplay__widget').children('.mejs-offscreen').remove();
+
     this.$('[role=application]').removeAttr('role tabindex');
+    this.$('.mejs-container').attr({
+      role: 'region',
+      'aria-label': containerLabel
+    });
     this.$('[aria-controls]').removeAttr('aria-controls');
+    this.$('.mejs-overlay-play').attr('aria-hidden', 'true');
   }
 
   setupEventListeners() {
@@ -256,16 +317,16 @@ class MediaAutoplayView extends ComponentView {
     // wrapper to check if preventForwardScrubbing is turned on.
     if ((this.model.get('_preventForwardScrubbing')) && (!this.model.get('_isComplete'))) {
       $(this.mediaElement).on({
-        'seeking': this.onMediaElementSeeking,
-        'timeupdate': this.onMediaElementTimeUpdate
+        seeking: this.onMediaElementSeeking,
+        timeupdate: this.onMediaElementTimeUpdate
       });
     }
 
     // handle other completion events in the event Listeners
     $(this.mediaElement).on({
-      'play': this.onMediaElementPlay,
-      'pause': this.onMediaElementPause,
-      'ended': this.onMediaElementEnded
+      play: this.onMediaElementPlay,
+      pause: this.onMediaElementPause,
+      ended: this.onMediaElementEnded
     });
 
     // occasionally the mejs code triggers a click of the captions language
@@ -287,7 +348,7 @@ class MediaAutoplayView extends ComponentView {
 
     this.$(selector).on('click.mediaCaptionsChange', _.debounce(() => {
       const srclang = this.mediaElement.player.selectedTrack ? this.mediaElement.player.selectedTrack.srclang : 'none';
-      Adapt.offlineStorage.set('captions', srclang);
+      offlineStorage.set('captions', srclang);
       Adapt.trigger('media:captionsChange', this, srclang);
     }, 250)); // needs debouncing because the click event fires twice
 
@@ -310,7 +371,7 @@ class MediaAutoplayView extends ComponentView {
     // because calling player.setTrack doesn't update the cc button's languages popup...
     const $inputs = this.$('.mejs-captions-selector input');
     $inputs.filter(':checked').prop('checked', false);
-    $inputs.filter('[value="' + lang + '"]').prop('checked', true);
+    $inputs.filter(`[value="${lang}"]`).prop('checked', true);
   }
 
   /**
@@ -333,11 +394,13 @@ class MediaAutoplayView extends ComponentView {
     Adapt.trigger('audio:stopAllChannels');
     Adapt.trigger('media:stop', this);
 
-    if (this.model.get('_pauseWhenOffScreen')) $(this.mediaElement).on('inview', this.onMediaElementInview);
+    if (this.model.get('_pauseWhenOffScreen')) {
+      $(this.mediaElement).on('inview', this.onMediaElementInview);
+    }
 
     this.model.set({
-      '_isMediaPlaying': true,
-      '_isMediaEnded': false
+      _isMediaPlaying: true,
+      _isMediaEnded: false
     });
 
     if (this.completionEvent === 'play') {
@@ -349,6 +412,7 @@ class MediaAutoplayView extends ComponentView {
         this.hideInstruction();
       }
     }
+
   }
 
   onMediaElementPause(event) {
@@ -384,6 +448,14 @@ class MediaAutoplayView extends ComponentView {
 
   onMediaElementInview(event, isInView) {
     if (!isInView && !event.currentTarget.paused) event.currentTarget.pause();
+
+    if (this.completionEvent === 'ended') {
+      this.setCompletionStatus();
+    }
+  }
+
+  onWidgetInview(event, isInView) {
+    if (!isInView && !this.mediaElement.paused) this.mediaElement.player.pause();
   }
 
   onMediaElementSeeking(event) {
@@ -391,9 +463,9 @@ class MediaAutoplayView extends ComponentView {
     if (!maxViewed) {
       maxViewed = 0;
     }
-    if (event.target.currentTime > maxViewed) {
-      event.target.currentTime = maxViewed;
-    }
+
+    if (event.target.currentTime <= maxViewed) return;
+    event.target.currentTime = maxViewed;
   }
 
   onMediaElementTimeUpdate(event) {
@@ -401,9 +473,9 @@ class MediaAutoplayView extends ComponentView {
     if (!maxViewed) {
       maxViewed = 0;
     }
-    if (event.target.currentTime > maxViewed) {
-      this.model.set('_maxViewed', event.target.currentTime);
-    }
+
+    if (event.target.currentTime <= maxViewed) return;
+    this.model.set('_maxViewed', event.target.currentTime);
   }
 
   // Overrides the default play/pause functionality to stop accidental playing on touch devices
@@ -412,7 +484,8 @@ class MediaAutoplayView extends ComponentView {
     const player = this.mediaElement.player;
 
     if (!player) {
-      console.log('MediaAutoplay.setupPlayPauseToggle: OOPS! there is no player reference.');
+      logging.warn('MediaAutoplay.setupPlayPauseToggle: OOPS! there is no player reference.');
+
       return;
     }
 
@@ -436,7 +509,6 @@ class MediaAutoplayView extends ComponentView {
     if (!this.mediaElement || !this.mediaElement.player) return;
 
     this.mediaElement.player.pause();
-
   }
 
   onOverlayClick() {
@@ -465,6 +537,7 @@ class MediaAutoplayView extends ComponentView {
   remove() {
     this.$('.mejs-overlay-button').off('click', this.onOverlayClick);
     this.$('.mejs-mediaelement').off('click', this.onMediaElementClick);
+    this.$('.mejs-container').off('inview', this.onWidgetInview);
 
     if (this.model.get('_useClosedCaptions')) {
       const selector = this.model.get('_playerOptions').toggleCaptionsButtonWhenOnlyOne ?
@@ -497,12 +570,12 @@ class MediaAutoplayView extends ComponentView {
 
     if (this.mediaElement) {
       $(this.mediaElement).off({
-        'play': this.onMediaElementPlay,
-        'pause': this.onMediaElementPause,
-        'ended': this.onMediaElementEnded,
-        'seeking': this.onMediaElementSeeking,
-        'timeupdate': this.onMediaElementTimeUpdate,
-        'inview': this.onMediaElementInview
+        play: this.onMediaElementPlay,
+        pause: this.onMediaElementPause,
+        ended: this.onMediaElementEnded,
+        seeking: this.onMediaElementSeeking,
+        timeupdate: this.onMediaElementTimeUpdate,
+        inview: this.onMediaElementInview
       });
 
       this.mediaElement.src = '';
@@ -510,7 +583,7 @@ class MediaAutoplayView extends ComponentView {
       delete this.mediaElement;
     }
 
-    ComponentView.prototype.remove.call(this);
+    super.remove();
   }
 
   onDeviceChanged() {
@@ -518,6 +591,7 @@ class MediaAutoplayView extends ComponentView {
       this.$('.mejs-container').width(this.$('.component__widget').width());
     }
     this.positionInstruction();
+    super.remove();
   }
 
   onPlayerReady(mediaElement, domObject) {
@@ -533,6 +607,12 @@ class MediaAutoplayView extends ComponentView {
 
     this.addThirdPartyAfterFixes();
     this.cleanUpPlayerAfter();
+
+    if (player && this.model.has('_startVolume')) {
+      // Setting the start volume only works with the Flash-based player if you do it here rather than in setupPlayer
+      player.setVolume(parseInt(this.model.get('_startVolume')) / 100);
+    }
+
     this.setReadyStatus();
     this.setupEventListeners();
     this.setVideoVolume();
@@ -559,7 +639,9 @@ class MediaAutoplayView extends ComponentView {
     // need slight delay before focussing button to make it work when JAWS is running
     // see https://github.com/adaptlearning/adapt_framework/issues/2427
     _.delay(() => {
-      this.$('.media-inline-transcript-button').a11y_focus();
+
+      a11y.focus(this.$('.media-inline-transcript-button'));
+
     }, 250);
   }
 
@@ -572,28 +654,29 @@ class MediaAutoplayView extends ComponentView {
     if ($transcriptBodyContainer.hasClass('inline-transcript-open')) {
       $transcriptBodyContainer.stop(true, true).slideUp(() => {
         $(window).resize();
-      });
-      $button.attr('aria-expanded', false);
-      $transcriptBodyContainer.removeClass('inline-transcript-open');
-      $buttonText.html(this.model.get('_transcript').inlineTranscriptButton);
-    } else {
-      $transcriptBodyContainer.stop(true, true).slideDown(() => {
-        $(window).resize();
-      });
-      $button.attr('aria-expanded', true);
-      $transcriptBodyContainer.addClass('inline-transcript-open');
-      $buttonText.html(this.model.get('_transcript').inlineTranscriptCloseButton);
+      }).removeClass('inline-transcript-open');
 
-      if (this.model.get('_transcript')._setCompletionOnView !== false) {
-        this.setCompletionStatus();
-      }
+      $button.attr('aria-expanded', false);
+      $buttonText.html(this.model.get('_transcript').inlineTranscriptButton);
+
+      return;
+    }
+
+    $transcriptBodyContainer.stop(true, true).slideDown(() => {
+      $(window).resize();
+    }).addClass('inline-transcript-open');
+
+    $button.attr('aria-expanded', true);
+    $buttonText.html(this.model.get('_transcript').inlineTranscriptCloseButton);
+
+    if (this.model.get('_transcript')._setCompletionOnView !== false) {
+      this.setCompletionStatus();
     }
   }
 
   onExternalTranscriptClicked(event) {
-    if (this.model.get('_transcript')._setCompletionOnView !== false) {
-      this.setCompletionStatus();
-    }
+    if (this.model.get('_transcript')._setCompletionOnView === false) return;
+    this.setCompletionStatus();
   }
 
   /**
@@ -621,9 +704,8 @@ class MediaAutoplayView extends ComponentView {
     }
 
     // Fire the event after a delay, only if another event has not just been fired
-    if (timeSinceLastEvent > debounceTime) {
-      this.eventTimeout = setTimeout(this.triggerGlobalEvent.bind(this, eventType), debounceTime);
-    }
+    if (timeSinceLastEvent <= debounceTime) return;
+    this.eventTimeout = setTimeout(this.triggerGlobalEvent.bind(this, eventType), debounceTime);
   }
 
   triggerGlobalEvent(eventType) {
@@ -969,5 +1051,7 @@ class MediaAutoplayView extends ComponentView {
 }
 
 MediaAutoplayView.froogaloopAdded = false;
+
+MediaAutoplayView.template = 'media';
 
 export default MediaAutoplayView;
