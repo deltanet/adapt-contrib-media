@@ -66,10 +66,10 @@
   .media-options-container {
     position: absolute;
     z-index: 1;
-    right: 0;
+    right: @component-padding-hoz;
     .dir-rtl & {
       right: inherit;
-      left: 0;
+      left: @component-padding-hoz;
     }
   }
 
@@ -83,8 +83,8 @@
       .transition(background-color @duration ease-in, color @duration ease-in;);
     }
 
-    padding: @btn-padding;
-    min-height: @icon-size + (@btn-padding*2);
+    padding: @icon-padding;
+    min-height: @icon-size + (@icon-padding*2);
 
     float: right;
     .dir-rtl & {
