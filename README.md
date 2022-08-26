@@ -27,7 +27,7 @@ The attributes listed below are used in *components.json* to configure **Media**
 [**core model attributes**](https://github.com/adaptlearning/adapt_framework/wiki/Core-model-attributes): These are inherited by every Adapt component. [Read more](https://github.com/adaptlearning/adapt_framework/wiki/Core-model-attributes).
 
 ### \_component (string):
-This must be set to `"media-autoplay"`.
+This must be set to `"mediaAutoplay"`.
 
 ### \_classes (string):
 CSS class name(s) to be applied to this component’s containing `div`. The class(es) must be predefined in one of the Less files. Separate multiple classes with a space.

@@ -75,10 +75,10 @@ const ariaLabelMappings = {
 };
 
 Adapt.on('app:dataReady', () => {
-  // Populate the aria labels from the _global._components._media
+  // Populate the aria labels from the _global._components._mediaAutoplay
   const dynamicLabels = window.mejs.i18n.locale.strings['en-US'];
   const fixedDefaults = window.mejs.MepDefaults;
-  const globals = Adapt.course.get('_globals')?._components?._media;
+  const globals = Adapt.course.get('_globals')?._components?._mediaAutoplay;
   for (const k in ariaLabelMappings) {
     dynamicLabels[ariaLabelMappings[k]] = globals[k] ?? ariaLabelMappings[k];
     fixedDefaults[k] = dynamicLabels[ariaLabelMappings[k]];
@@ -240,7 +240,7 @@ class MediaAutoplayView extends ComponentView {
 
       // Check if we're streaming
       if (!_media.source) return;
-      this.$('.media-autoplay__widget').addClass('external-source');
+      this.$('.mediaautoplay__widget').addClass('external-source');
     });
 
     this.mediaAutoplayOnce = this.model.get('_autoPlayOnce');
@@ -261,7 +261,7 @@ class MediaAutoplayView extends ComponentView {
 
     if (!media?.type) return;
     const typeClass = media.type.replace(/\//, '-');
-    this.$('.media-autoplay__widget').addClass(typeClass);
+    this.$('.mediaautoplay__widget').addClass(typeClass);
   }
 
   addThirdPartyFixes(modelOptions, callback) {
@@ -296,7 +296,7 @@ class MediaAutoplayView extends ComponentView {
 
   cleanUpPlayer() {
     const containerLabel = this.model.get('displayTitle') || this.model.get('title');
-    this.$('.media-autoplay__widget').children('.mejs-offscreen').remove();
+    this.$('.mediaautoplay__widget').children('.mejs-offscreen').remove();
 
     this.$('[role=application]').removeAttr('role tabindex');
     this.$('.mejs-container').attr({
@@ -647,9 +647,9 @@ class MediaAutoplayView extends ComponentView {
 
   onToggleInlineTranscript(event) {
     if (event) event.preventDefault();
-    const $transcriptBodyContainer = this.$('.media-autoplay__transcript-body-inline');
-    const $button = this.$('.media-autoplay__transcript-btn-inline');
-    const $buttonText = this.$('.media-autoplay__transcript-btn-inline .media-autoplay__transcript-btn-text');
+    const $transcriptBodyContainer = this.$('.mediaautoplay__transcript-body-inline');
+    const $button = this.$('.mediaautoplay__transcript-btn-inline');
+    const $buttonText = this.$('.mediaautoplay__transcript-btn-inline .mediaautoplay__transcript-btn-text');
 
     if ($transcriptBodyContainer.hasClass('inline-transcript-open')) {
       $transcriptBodyContainer.stop(true, true).slideUp(() => {
@@ -926,7 +926,7 @@ class MediaAutoplayView extends ComponentView {
       _isCancellable: true,
       _showCloseButton: true,
       _closeOnBackdrop: true,
-      _classes: ' media-autoplay'
+      _classes: ' mediaautoplay'
     });
 
     this.listenToOnce(Adapt, {

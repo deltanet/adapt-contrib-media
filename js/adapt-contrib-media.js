@@ -2,7 +2,7 @@ import components from 'core/js/components';
 import MediaAutoplayView from './mediaView';
 import MediaAutoplayModel from './mediaModel';
 
-export default components.register('media-autoplay', {
+export default components.register('mediaAutoplay', {
   model: MediaAutoplayModel,
   view: MediaAutoplayView
 });

@@ -12,7 +12,7 @@
           "type": "object",
           "default": {},
           "properties": {
-            "_media": {
+            "_mediaAutoplay": {
               "type": "object",
               "default": {},
               "properties": {

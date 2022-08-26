@@ -1,5 +1,5 @@
 {{import_globals}}
-<div class="component__inner media-autoplay__inner">
+<div class="component__inner mediaautoplay__inner">
 
   {{> component this}}
 
@@ -7,13 +7,13 @@
   <button class="aria-label js-skip-to-transcript" tabindex="-1" aria-label="{{_globals._components._media.skipToTranscript}}"></button>
   {{/any}}
 
-  <div class="component__widget media-autoplay__widget">
+  <div class="component__widget mediaautoplay__widget">
 
     <div class="media-options-container">
       {{#if _showCaptionsButton}}
         <div class="media-subtitles-container">
           <div class="media-subtitles-button-container">
-            <button class="options-button icon {{#if _closedCaptionsIcon}}{{_closedCaptionsIcon}}{{else}}icon-comment{{/if}} media-subtitles-button" aria-label="{{_globals._components._media-autoplay.ariaCaptionsLabel}}"></button>
+            <button class="options-button icon {{#if _closedCaptionsIcon}}{{_closedCaptionsIcon}}{{else}}icon-comment{{/if}} media-subtitles-button" aria-label="{{_globals._components._mediaAutoplay.ariaCaptionsLabel}}"></button>
           </div>
           <div class="media-subtitles-options">
             <button class="media-subtitles-option" srclang="none">
@@ -33,9 +33,9 @@
         <div class="media-transcript-button-container">
           {{#if _transcript._inlineTranscript}}
             {{#if _transcript.inlineTranscriptButton}}
-              <button class="options-button media-inline-transcript-button" aria-label="{{_globals._components._media-autoplay.ariaTranscriptLabel}}">{{_transcript.inlineTranscriptButton}}</button>
+              <button class="options-button media-inline-transcript-button" aria-label="{{_globals._components._mediaAutoplay.ariaTranscriptLabel}}">{{_transcript.inlineTranscriptButton}}</button>
             {{else}}
-              <button class="options-button icon icon-menu media-inline-transcript-button" aria-label="{{_globals._components._media-autoplay.ariaTranscriptLabel}}"></button>
+              <button class="options-button icon icon-menu media-inline-transcript-button" aria-label="{{_globals._components._mediaAutoplay.ariaTranscriptLabel}}"></button>
             {{/if}}
           {{/if}}
           {{#if _transcript._externalTranscript}}
@@ -85,11 +85,11 @@
   </div>
 
   {{#if _transcript}}
-  <div class="media-autoplay__transcript-container">
+  <div class="mediaautoplay__transcript-container">
 
     {{#if _transcript._inlineTranscript}}
-    <div class="media-autoplay__transcript-body-inline" role="region" aria-label="{{#if _transcript.inlineTranscriptButton}}{{_transcript.inlineTranscriptButton}}{{else}}{{_transcript.transcriptLink}}{{/if}}">
-      <div class="media-autoplay__transcript-body-inline-inner">
+    <div class="mediaautoplay__transcript-body-inline" role="region" aria-label="{{#if _transcript.inlineTranscriptButton}}{{_transcript.inlineTranscriptButton}}{{else}}{{_transcript.transcriptLink}}{{/if}}">
+      <div class="mediaautoplay__transcript-body-inline-inner">
         {{{compile _transcript.inlineTranscriptBody}}}
       </div>
     </div>
