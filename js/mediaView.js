@@ -2,6 +2,7 @@ import Adapt from 'core/js/adapt';
 import offlineStorage from 'core/js/offlineStorage';
 import a11y from 'core/js/a11y';
 import logging from 'core/js/logging';
+import notify from 'core/js/notify';
 import ComponentView from 'core/js/views/componentView';
 import 'libraries/mediaelement-and-player';
 import 'libraries/mediaelement-fullscreen-hook';
@@ -587,11 +588,10 @@ class MediaAutoplayView extends ComponentView {
   }
 
   onDeviceChanged() {
-    if (this.model.get('_media').source) {
-      this.$('.mejs-container').width(this.$('.component__widget').width());
-    }
+    if (!this.model.get('_media').source) return;
+    this.$('.mejs-container').width(this.$('.component__widget').width());
+    
     this.positionInstruction();
-    super.remove();
   }
 
   onPlayerReady(mediaElement, domObject) {
@@ -920,7 +920,7 @@ class MediaAutoplayView extends ComponentView {
       this.setCompletionStatus();
     }
 
-    Adapt.notify.popup({
+    notify.popup({
       title: this.model.get('_transcript').inlineTranscriptTitle,
       body: this.model.get('_transcript').inlineTranscriptBody,
       _isCancellable: true,
