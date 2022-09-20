@@ -1,6 +1,7 @@
 import Adapt from 'core/js/adapt';
 import offlineStorage from 'core/js/offlineStorage';
 import a11y from 'core/js/a11y';
+import device from 'core/js/device';
 import logging from 'core/js/logging';
 import notify from 'core/js/notify';
 import ComponentView from 'core/js/views/componentView';
@@ -773,7 +774,7 @@ class MediaAutoplayView extends ComponentView {
   showInstruction() {
     let position = 50;
 
-    if (Adapt.device.screenSize === 'large') {
+    if (device.screenSize === 'large') {
       position = this.instructionPosition;
     }
 
@@ -1023,7 +1024,7 @@ class MediaAutoplayView extends ComponentView {
   positionInstruction() {
     let position = 50;
 
-    if (Adapt.device.screenSize === 'large') {
+    if (device.screenSize === 'large') {
       position = this.instructionPosition;
     }
 
