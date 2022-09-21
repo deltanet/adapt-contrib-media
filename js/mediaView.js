@@ -82,7 +82,7 @@ Adapt.on('app:dataReady', () => {
   const fixedDefaults = window.mejs.MepDefaults;
   const globals = Adapt.course.get('_globals')?._components?._mediaAutoplay;
   for (const k in ariaLabelMappings) {
-    dynamicLabels[ariaLabelMappings[k]] = globals[k] ?? ariaLabelMappings[k];
+    dynamicLabels[ariaLabelMappings[k]] = (globals && globals[k]) ?? ariaLabelMappings[k];
     fixedDefaults[k] = dynamicLabels[ariaLabelMappings[k]];
   }
 });
