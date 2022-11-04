@@ -3,10 +3,6 @@
 
   {{> component this}}
 
-  {{#any _transcript._externalTranscript _transcript._inlineTranscript}}
-  <button class="aria-label js-skip-to-transcript" tabindex="-1" aria-label="{{_globals._components._media.skipToTranscript}}"></button>
-  {{/any}}
-
   <div class="component__widget media-autoplay__widget a11y-ignore-aria">
 
     <div class="media-options-container">
