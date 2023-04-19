@@ -790,7 +790,7 @@ class MediaAutoplayView extends ComponentView {
   setVideoVolume() {
     if (!this.mediaElement) return;
     // Check for audio extension
-    if (!Adapt.audio) return;
+    //if (!Adapt.audio) return;
     if (Adapt.course.get('_audio') && Adapt.course.get('_audio')._isEnabled) {
       // If audio is turned on
       if (Adapt.audio.audioStatus == 1) {
